@@ -29,3 +29,24 @@ jobs:
       - name: Run a one-line script
         run: echo Hello, world!
 
+      - name: Google GCP Auth
+        id: auth
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ inputs.gcp-credentials }}"
+          
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+    
+      - name: Setup GKE Auth plugin
+        run: gcloud components install gke-gcloud-auth-plugin  
+          
+      - name: List projects
+        run: gcloud projects list
+        
+      #gcloud config set project YOUR_PROJECT_ID
+      #gcloud services list --available
+      #gcloud services enable SERVICE_NAME
+      
+      
+
