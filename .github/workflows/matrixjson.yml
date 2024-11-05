@@ -13,8 +13,10 @@ defaults:
     
 jobs:
   setup:
-    name: Capture environments
+    name: Set JSON files
     runs-on: ubuntu-latest
+    outputs:
+      jsonfiles: ${{ steps.matrix.outputs.jsonfiles }}
 
     steps:
     - name: Checkout code
@@ -23,12 +25,12 @@ jobs:
     - name: Check files
       run: |
         pwd
-        echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
+        echo "jsonfiles=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
 
     - name: Generate matrix
       id: matrix
       run: |
-        echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
+        echo "jsonfile=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
 
   process-json:
     needs: 
@@ -38,13 +40,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: ${{ fromJSON(needs.setup.outputs.environments) }}
+        jsonfiles: ${{ fromJSON(needs.setup.outputs.jsonfiles) }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: ${{ matrix.environment }}-variables
-      run: cat ${{ matrix.environment }}
+    - name: cat ${{ matrix.jsonfiles }}
+      run: cat ${{ matrix.jsonfiles }}
      
