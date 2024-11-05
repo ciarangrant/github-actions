@@ -22,8 +22,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Check filess
-      id: matrix
+    - name: Check files
       run: |
         pwd
         echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
