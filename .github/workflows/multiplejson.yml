@@ -42,4 +42,7 @@ jobs:
         run: |
           echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
           echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
+
+      - name: Use matrix
+        run: cat ${{ matrix }} 
    
