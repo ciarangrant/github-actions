@@ -28,3 +28,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
+
+      - name: Generate matrix
+        id: matrix
+        run: |
+          echo "environments=$( jq -c -n --arg diff "$(ls ../*.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
+          echo "environments=$( jq -c -n --arg diff "$(ls ../*.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
+   
