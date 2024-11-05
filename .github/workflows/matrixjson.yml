@@ -54,7 +54,7 @@ jobs:
       run: cat ${{ matrix.environment }}
 
     - name: sed ${{ matrix.environment }} 
-      run: sed -i "s/color/colour/g" ${{ matrix.environment }}  
+      run: sed -i "s/color/${{ inputs.environment }}/g" ${{ matrix.environment }}  
 
     - name: cat ${{ matrix.environment }} after
       run: cat ${{ matrix.environment }}  
