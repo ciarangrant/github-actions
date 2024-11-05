@@ -1,0 +1,53 @@
+name: Use Matriz for JSON
+
+on:
+  push:
+    branches:
+    - main
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./.github
+    
+jobs:
+  setup:
+    name: Capture environments
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.matrix.outputs.environments }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check filess
+      id: matrix
+      run: |
+        pwd
+        echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
+
+    - name: Generate matrix
+      id: matrix
+      run: |
+        echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
+
+  process-json:
+    needs: 
+    - setup
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.setup.outputs.environments) }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+   - name: ${{ matrix.environment }}-variables
+     run: cat ${{ matrix.environment }}
+     
