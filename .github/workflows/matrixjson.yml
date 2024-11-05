@@ -48,6 +48,6 @@ jobs:
       with:
         fetch-depth: 0
 
-   - name: ${{ matrix.environment }}-variables
-     run: cat ${{ matrix.environment }}
+    - name: ${{ matrix.environment }}-variables
+      run: cat ${{ matrix.environment }}
      
