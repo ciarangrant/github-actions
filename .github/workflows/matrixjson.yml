@@ -47,6 +47,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: cat ${{ matrix.environment }}
+    - name: cat ${{ matrix.environment }} before
       run: cat ${{ matrix.environment }}
-     
+
+    - name: sed ${{ matrix.environment }} 
+      run: sed -i "s/color/colour/g" ${{ matrix.environment }}  
+
+    - name: cat ${{ matrix.environment }} after
+      run: cat ${{ matrix.environment }}  
