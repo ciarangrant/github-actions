@@ -62,7 +62,6 @@ jobs:
     - name: Deploy to Grafans
         env:
           GRAFANA_URL: 'https://dev-grafana.example.com'
-          GRAFANA_API_KEY: ${{ secrets.DEV_GRAFANA_API_KEY }}
           ENVIRONMENT: dev
         run: |
           curl -X GET \
