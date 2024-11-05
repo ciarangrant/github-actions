@@ -35,7 +35,7 @@ jobs:
         run: |
           pwd
           ls -ltra
-          ls -ltra .github
+          ls -ltra *.json
 
       - name: Generate matrix
         id: matrix
