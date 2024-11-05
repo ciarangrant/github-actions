@@ -32,6 +32,6 @@ jobs:
       - name: Generate matrix
         id: matrix
         run: |
-          echo "environments=$( jq -c -n --arg diff "$(ls ../*.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
-          echo "environments=$( jq -c -n --arg diff "$(ls ../*.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
+          echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
+          echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )" >> $GITHUB_OUTPUT
    
