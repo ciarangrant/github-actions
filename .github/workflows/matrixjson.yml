@@ -60,11 +60,11 @@ jobs:
       run: cat ${{ matrix.environment }}  
 
     - name: Deploy to Grafans
-        env:
-          GRAFANA_URL: 'https://dev-grafana.example.com'
-          ENVIRONMENT: dev
-        run: |
-          curl -X GET \
-            -H "Content-Type: application/json" \
-            -d ${{ matrix.environment }} \
-            "https://api.country.is/"  
+      env:
+        GRAFANA_URL: 'https://dev-grafana.example.com'
+        ENVIRONMENT: dev
+      run: |
+        curl -X GET \
+          -H "Content-Type: application/json" \
+          -d ${{ matrix.environment }} \
+          "https://api.country.is/"  
