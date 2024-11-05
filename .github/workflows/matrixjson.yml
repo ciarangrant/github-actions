@@ -67,4 +67,4 @@ jobs:
           curl -X GET \
             -H "Content-Type: application/json" \
             -d ${{ matrix.environment }} \
-            https://api.country.is/"  
+            "https://api.country.is/"  
