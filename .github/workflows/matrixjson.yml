@@ -15,12 +15,15 @@ jobs:
   setup:
     name: Capture environments
     runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.matrix.outputs.environments }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Check files
+    - name: Check filess
+      id: matrix
       run: |
         pwd
         echo "environments=$( jq -c -n --arg diff "$(ls *.json)" '$diff | split("\n") | map(select(.) | .) | unique' )"
