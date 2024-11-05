@@ -29,7 +29,7 @@ jobs:
       - name: Run a one-line script
         run: |
           pwd
-          ls -ltr
+          ls -ltra
 
       - name: Generate matrix
         id: matrix
