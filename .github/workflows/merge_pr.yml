@@ -23,9 +23,9 @@ jobs:
 
   notify-slack:
    if: github.event.pull_request.merged == true
-      runs-on: ubuntu-latest
-      needs: [get_file_content, parse-content] 
-      steps:
-        - name: Slack Notification (App)
-          run: |
-            echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}"
+   runs-on: ubuntu-latest
+   needs: [get_file_content] 
+   steps:
+     - name: Slack Notification (App)
+       run: |
+         echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}"
