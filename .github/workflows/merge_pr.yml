@@ -1,8 +1,8 @@
-name: PR Merged Notification
+name: PR Merged Notification with File Content
 
 on:
  pull_request:
-    types: [closed]
+   types: [closed]
 
 jobs:
   get_file_content:
@@ -11,22 +11,38 @@ jobs:
     outputs:
       file_content: ${{ steps.get-content.outputs.content }}
     steps:
-      - name: Checkout Target Branch
+      - name: Checkout Target Branch 
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.base.ref }}
+          ref: ${{ github.event.pull_request.base.ref }} 
 
-      - name: Get File Content
+      - name: Get Last Line of File
         id: get-content
         run: |
-          echo "::set-output name=content::$(cat my_file.txt)"
+          echo "::set-output name=content::$(tail -n 1 my_file.txt)" 
+
+  parse_content:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    needs: get_file_content
+    steps:
+      - name: Parse File Content
+        id: parse-content
+        run: |
+          LAST_LINE="${{ needs.get_file_content.outputs.file_content }}"
+          TIMESTAMP="${LAST_LINE%%,*}" 
+          REPO_NAME="${LAST_LINE#*,}"   
+          REPO_NAME="${REPO_NAME%%,*}" 
+          CREATOR="${LAST_LINE##*,}"    
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "creator=$CREATOR" >> $GITHUB_OUTPUT
 
   notify-slack:
-   if: github.event.pull_request.merged == true
-   runs-on: ubuntu-latest
-   needs: [get_file_content] 
-   steps:
-     - name: Slack Notification (App)
-       run: |
-         echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}"
-
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    needs: [get_file_content, parse_content] 
+    steps:
+      - name: Slack Notification (App)
+        run: |
+          echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}"
