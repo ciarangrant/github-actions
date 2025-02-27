@@ -1,4 +1,4 @@
-name: PR Merged Notification with File Content
+name: PR Merged Notification
 
 on:
  pull_request:
