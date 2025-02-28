@@ -69,11 +69,12 @@ jobs:
           TIMESTAMP="${LAST_LINE%%,*}" 
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
-          CREATOR="${LAST_LINE##*,}"
-          CREATOR="${CREATOR##*/}"
-          echo "lastline=$LAST_LINE"
+          CREATOR_FULL="${LAST_LINE##*,}"
+          CREATOR="${CREATOR_FULL##*/}"
+          echo "last_line=$LAST_LINE"
           echo "timestamp=$TIMESTAMP"
           echo "repo_name=$REPO_NAME"
+          echo "creator_full=$CREATOR_FULL"
           echo "creator=$CREATOR"
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
@@ -87,7 +88,12 @@ jobs:
             echo "text_ok=true"
           fi
           if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
-            echo "::warning::LAST_LINE does not have exactly two commas. Skipping notification."
+            echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
+            echo "text_ok=false" >> $GITHUB_OUTPUT
+            echo "text_ok=false"
+          fi
+          if ! echo "$CREATOR_FULL" | grep -q '/'; then
+            echo "::warning::Username contains an invalid character (/). Skipping notification."
             echo "text_ok=false" >> $GITHUB_OUTPUT
             echo "text_ok=false"
           fi
