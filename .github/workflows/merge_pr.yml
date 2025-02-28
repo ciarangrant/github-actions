@@ -42,15 +42,15 @@ jobs:
             # Validations
             if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
               echo "::warning::One or more required values are blank. Skipping notification."
-              exit 0
+              exit 1
             fi
             if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
               echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
-              exit 0
+              exit 1
             fi
             if ! echo "$OWNER_FULL" | grep -q '/'; then
               echo "::warning::Username contains an invalid character (/). Skipping notification."
-              exit 0
+              exit 1
             fi
 
             # Set outputs for notification if all checks pass
@@ -59,7 +59,7 @@ jobs:
             echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           else
             echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
-            exit 0 
+            exit 1
           fi
 
       - name: Slack Notification (App)
