@@ -19,7 +19,9 @@ jobs:
       - name: Check Branch Name in PR Title
         id: check-branch-name
         run: |
-          if echo "${{ github.event.pull_request.title }}" | grep -q "${{ github.event.pull_request.head.ref }}" ; then
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          BRANCH_NAME="${BRANCH_NAME##*/}"  # Extract part after last '/'
+          if echo "${{ github.event.pull_request.title }}" | grep -q "$BRANCH_NAME" ; then
             echo "branch_in_title=true"
             echo "branch_in_title=true" >> $GITHUB_OUTPUT
           else
