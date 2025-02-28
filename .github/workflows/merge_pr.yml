@@ -20,9 +20,11 @@ jobs:
         id: check-branch-name
         run: |
           if echo "${{ github.event.pull_request.title }}" | grep -q "${{ github.event.pull_request.head.ref }}" ; then
+            echo "branch_in_title=true"
             echo "branch_in_title=true" >> $GITHUB_OUTPUT
           else
             echo "::warning::Branch name not found in PR title. Skipping notification."
+            echo "branch_in_title=false"
             echo "branch_in_title=false" >> $GITHUB_OUTPUT
           fi
 
@@ -32,9 +34,11 @@ jobs:
         run: |
           if [[ -f "terraform-deployments/external-project-roles/projects.txt" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
+            echo "exists=true"
           else
             echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
             echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false"
           fi
         
       - name: Get Last Line of File
