@@ -60,7 +60,7 @@ jobs:
     needs: get-file-content
     outputs:
       repo_name: ${{ steps.parse-content.outputs.repo_name }}
-      creator: ${{ steps.parse-content.outputs.creator }}
+      owner: ${{ steps.parse-content.outputs.owner }}
       timestamp: ${{ steps.parse-content.outputs.timestamp }}
       text_ok: ${{ steps.parse-content.outputs.text_ok }}
     steps:
@@ -71,17 +71,17 @@ jobs:
           TIMESTAMP="${LAST_LINE%%,*}" 
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
-          CREATOR_FULL="${LAST_LINE##*,}"
-          CREATOR="${CREATOR_FULL##*/}"
+          OWNER_FULL="${LAST_LINE##*,}"
+          OWNER="${OWNER_FULL##*/}"
           echo "last_line=$LAST_LINE"
           echo "timestamp=$TIMESTAMP"
           echo "repo_name=$REPO_NAME"
-          echo "creator_full=$CREATOR_FULL"
-          echo "creator=$CREATOR"
+          echo "owner_full=$OWNER_FULL"
+          echo "owner=$OWNER"
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-          echo "creator=$CREATOR" >> $GITHUB_OUTPUT
-          if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$CREATOR" ]]; then
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
+          if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
             echo "::warning::One or more required values are blank. Skipping notification."
             echo "text_ok=false" >> $GITHUB_OUTPUT
             echo "text_ok=false"
@@ -94,7 +94,7 @@ jobs:
             echo "text_ok=false" >> $GITHUB_OUTPUT
             echo "text_ok=false"
           fi
-          if ! echo "$CREATOR_FULL" | grep -q '/'; then
+          if ! echo "$OWNER_FULL" | grep -q '/'; then
             echo "::warning::Username contains an invalid character (/). Skipping notification."
             echo "text_ok=false" >> $GITHUB_OUTPUT
             echo "text_ok=false"
@@ -109,5 +109,5 @@ jobs:
     steps:
       - name: Slack Notification (App)
         run: |
-          echo "Repository ${{ needs.parse-content.outputs.repo_name }} has been created by ${{ needs.parse-content.outputs.creator }} at ${{ needs.parse-content.outputs.timestamp }}" 
+          echo "Repository ${{ needs.parse-content.outputs.repo_name }} has been created by ${{ needs.parse-content.outputs.owner }} at ${{ needs.parse-content.outputs.timestamp }}" 
           
