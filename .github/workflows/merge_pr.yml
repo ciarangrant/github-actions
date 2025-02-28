@@ -78,11 +78,7 @@ jobs:
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
-          
-      - name: Check values are not blank    
-        id: check-values
-        run: |
-          if [[ -z steps.parse-content.outputs.timestamp || -z steps.parse-content.outputs.repo_name || -z steps.parse-content.outputs.creator ]]; then
+          if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$CREATOR" ]]; then
             echo "::warning::One or more required values are blank. Skipping notification."
             echo "text_ok=false" >> $GITHUB_OUTPUT
             echo "text_ok=false"
