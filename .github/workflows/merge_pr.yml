@@ -67,7 +67,18 @@ jobs:
             exit 0
           fi
 
-      - name: Slack Notification (App)
+      - name: Check Message
         if: steps.check-branch-name.outputs.branch_in_title == 'true' && steps.process-file.outputs.validation_passed == 'true'
         run: |
           echo "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}" 
+
+      - name: Slack Notification (App)
+        if: steps.check-branch-name.outputs.branch_in_title == 'true' && steps.process-file.outputs.validation_passed == 'true'
+        run: |
+          curl -X POST -H 'Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}' \
+               -H 'Content-type: application/json' \
+               --data '{
+                 "channel": "#testing",
+                 "text": "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}"
+               }' \
+               https://slack.com/api/chat.postMessage
