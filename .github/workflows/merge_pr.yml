@@ -51,7 +51,7 @@ jobs:
               exit 0
             fi
             if ! echo "$OWNER_FULL" | grep -q '/'; then
-              echo "::warning::Username contains an invalid character (/). Skipping notification."
+              echo "::warning::Username is in an invalid format. Skipping notification."
               echo "validation_passed=false" >> $GITHUB_OUTPUT
               exit 0
             fi
