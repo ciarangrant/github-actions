@@ -17,8 +17,9 @@ jobs:
       - name: Check if File Exists
         id: check-file
         run: |
-          if [[ ! -f "dir1/dir2/projects.txt" ]]; then
-            echo "::warning::File 'dir1/dir2/projects.txt' not found. Skipping notification."
+          if [[ ! -f "terraform-deployments/external-project-roles/projects.txt" ]]; then
+            echo "XXXXXXXXXXXXXX"
+            echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
             exit 0  # Exit successfully
           fi
         
