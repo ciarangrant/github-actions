@@ -42,27 +42,32 @@ jobs:
             # Validations
             if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
               echo "::warning::One or more required values are blank. Skipping notification."
-              exit 1
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
             fi
             if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
               echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
-              exit 1
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
             fi
             if ! echo "$OWNER_FULL" | grep -q '/'; then
               echo "::warning::Username contains an invalid character (/). Skipping notification."
-              exit 1
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
             fi
 
             # Set outputs for notification if all checks pass
+            echo "validation_passed=true" >> $GITHUB_OUTPUT
             echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
             echo "owner=$OWNER" >> $GITHUB_OUTPUT
             echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           else
             echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
-            exit 1
+            echo "validation_passed=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
       - name: Slack Notification (App)
-        if: steps.check-branch-name.outputs.branch_in_title == 'true'
+        if: steps.check-branch-name.outputs.branch_in_title == 'true' && steps.process-file.outputs.validation_passed == 'true'
         run: |
           echo "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}" 
