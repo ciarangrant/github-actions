@@ -30,10 +30,10 @@ jobs:
         id: check-file
         if: steps.check-branch-name.outputs.branch_in_title == 'true'
         run: |
-          if [[ -f "dir1/dir2/projects.txt" ]]; then
+          if [[ -f "terraform-deployments/external-project-roles/projects.txt" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
-            echo "::warning::File 'dir1/dir2/projects.txt' not found. Skipping notification."
+            echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
         
