@@ -36,7 +36,7 @@ jobs:
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
           CREATOR="${LAST_LINE##*,}"
-          CREATOR="${CREATOR#*\//}"
+          CREATOR="${CREATOR##*/}"
           echo "lastline=$LAST_LINE"
           echo "timestamp=$TIMESTAMP"
           echo "repo_name=$REPO_NAME"
