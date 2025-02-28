@@ -86,6 +86,11 @@ jobs:
             echo "text_ok=true" >> $GITHUB_OUTPUT
             echo "text_ok=true"
           fi
+          if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
+            echo "::warning::LAST_LINE does not have exactly two commas. Skipping notification."
+            echo "text_ok=false" >> $GITHUB_OUTPUT
+            echo "text_ok=false"
+          fi
 
   notify-slack:
     if: needs.get-file-content.outputs.file_exists == 'true'
