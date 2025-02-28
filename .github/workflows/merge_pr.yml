@@ -1,15 +1,13 @@
-name: PR Merged Notification with File Content
+name: PR Merged Notification
+
 on:
-  pull_request:
+ pull_request:
     types: [closed]
+
 jobs:
-  get-file-content:
+  process-and-notify:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    outputs:
-      file_content: ${{ steps.get-content.outputs.content }}
-      file_exists: ${{ steps.check-file.outputs.exists }}
-      branch_in_title: ${{ steps.check-branch-name.outputs.branch_in_title }}
     steps:
       - name: Checkout Target Branch 
         uses: actions/checkout@v3
@@ -20,94 +18,51 @@ jobs:
         id: check-branch-name
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          BRANCH_NAME="${BRANCH_NAME##*/}"  # Extract part after last '/'
+          BRANCH_NAME="${BRANCH_NAME##*/}" 
           if echo "${{ github.event.pull_request.title }}" | grep -q "$BRANCH_NAME" ; then
-            echo "branch_in_title=true"
             echo "branch_in_title=true" >> $GITHUB_OUTPUT
           else
             echo "::warning::Branch name not found in PR title. Skipping notification."
-            echo "branch_in_title=false"
             echo "branch_in_title=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check if File Exists
-        id: check-file
+      - name: Check if File Exists and Process
+        id: process-file
         if: steps.check-branch-name.outputs.branch_in_title == 'true'
         run: |
           if [[ -f "terraform-deployments/external-project-roles/projects.txt" ]]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "exists=true"
+            echo "File 'terraform-deployments/external-project-roles/projects.txt' found."
+            LAST_LINE=$(tail -n 1 terraform-deployments/external-project-roles/projects.txt)
+            TIMESTAMP="${LAST_LINE%%,*}" 
+            REPO_NAME="${LAST_LINE#*,}"   
+            REPO_NAME="${REPO_NAME%%,*}" 
+            OWNER_FULL="${LAST_LINE##*,}"
+            OWNER="${OWNER_FULL##*/}"
+
+            # Validations
+            if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
+              echo "::warning::One or more required values are blank. Skipping notification."
+              exit 0
+            fi
+            if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
+              echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
+              exit 0
+            fi
+            if ! echo "$OWNER_FULL" | grep -q '/'; then
+              echo "::warning::Username contains an invalid character (/). Skipping notification."
+              exit 0
+            fi
+
+            # Set outputs for notification if all checks pass
+            echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+            echo "owner=$OWNER" >> $GITHUB_OUTPUT
+            echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           else
             echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "exists=false"
-          fi
-        
-      - name: Get Last Line of File
-        id: get-content
-        # Run only if file_exists output is 'true'
-        if: steps.check-file.outputs.exists == 'true'
-          && steps.check-branch-name.outputs.branch_in_title == 'true'
-        run: |
-          CONTENT=$(tail -n 1 terraform-deployments/external-project-roles/projects.txt)
-          echo "content=$CONTENT" >> $GITHUB_OUTPUT 
-
-  parse-content:
-    # Run only if file_exists output is 'true'
-    if: needs.get-file-content.outputs.file_exists == 'true'
-      && needs.get-file-content.outputs.branch_in_title == 'true'
-    runs-on: ubuntu-latest
-    needs: get-file-content
-    outputs:
-      repo_name: ${{ steps.parse-content.outputs.repo_name }}
-      owner: ${{ steps.parse-content.outputs.owner }}
-      timestamp: ${{ steps.parse-content.outputs.timestamp }}
-      text_ok: ${{ steps.parse-content.outputs.text_ok }}
-    steps:
-      - name: Parse File Content
-        id: parse-content
-        run: |
-          LAST_LINE="${{ needs.get-file-content.outputs.file_content }}"
-          TIMESTAMP="${LAST_LINE%%,*}" 
-          REPO_NAME="${LAST_LINE#*,}"   
-          REPO_NAME="${REPO_NAME%%,*}" 
-          OWNER_FULL="${LAST_LINE##*,}"
-          OWNER="${OWNER_FULL##*/}"
-          echo "last_line=$LAST_LINE"
-          echo "timestamp=$TIMESTAMP"
-          echo "repo_name=$REPO_NAME"
-          echo "owner_full=$OWNER_FULL"
-          echo "owner=$OWNER"
-          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-          echo "owner=$OWNER" >> $GITHUB_OUTPUT
-          if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
-            echo "::warning::One or more required values are blank. Skipping notification."
-            echo "text_ok=false" >> $GITHUB_OUTPUT
-            echo "text_ok=false"
-          else
-            echo "text_ok=true" >> $GITHUB_OUTPUT
-            echo "text_ok=true"
-          fi
-          if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
-            echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
-            echo "text_ok=false" >> $GITHUB_OUTPUT
-            echo "text_ok=false"
-          fi
-          if ! echo "$OWNER_FULL" | grep -q '/'; then
-            echo "::warning::Username contains an invalid character (/). Skipping notification."
-            echo "text_ok=false" >> $GITHUB_OUTPUT
-            echo "text_ok=false"
+            exit 0 
           fi
 
-  notify-slack:
-    if: needs.get-file-content.outputs.file_exists == 'true'
-      && needs.get-file-content.outputs.branch_in_title == 'true'
-      && needs.parse-content.outputs.text_ok == 'true'
-    runs-on: ubuntu-latest
-    needs: [get-file-content, parse-content] 
-    steps:
       - name: Slack Notification (App)
+        if: steps.check-branch-name.outputs.branch_in_title == 'true'
         run: |
-          echo "Repository ${{ needs.parse-content.outputs.repo_name }} has been created by ${{ needs.parse-content.outputs.owner }} at ${{ needs.parse-content.outputs.timestamp }}" 
-          
+          echo "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}" 
