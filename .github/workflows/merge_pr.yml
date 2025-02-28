@@ -60,6 +60,7 @@ jobs:
       repo_name: ${{ steps.parse-content.outputs.repo_name }}
       creator: ${{ steps.parse-content.outputs.creator }}
       timestamp: ${{ steps.parse-content.outputs.timestamp }}
+      text_ok: ${{ steps.parse-content.outputs.text_ok }}
     steps:
       - name: Parse File Content
         id: parse-content
@@ -77,10 +78,23 @@ jobs:
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
+          
+      - name: Check values are not blank    
+        id: check-values
+        run: |
+          if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$CREATOR" ]]; then
+            echo "::warning::One or more required values are blank. Skipping notification."
+            echo "valid_ok=false" >> $GITHUB_OUTPUT
+            echo "valid_ok=false"
+          else
+            echo "valid_ok=true" >> $GITHUB_OUTPUT
+            echo "valid_ok=true"
+          fi
 
   notify-slack:
     if: needs.get-file-content.outputs.file_exists == 'true'
       && needs.get-file-content.outputs.branch_in_title == 'true'
+      && needs.parse-content.outputs.valid_ok == 'true'
     runs-on: ubuntu-latest
     needs: [get-file-content, parse-content] 
     steps:
