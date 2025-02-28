@@ -28,6 +28,7 @@ jobs:
 
       - name: Check if File Exists
         id: check-file
+        if: steps.check-branch-name.outputs.branch_in_title == 'true'
         run: |
           if [[ -f "dir1/dir2/projects.txt" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
