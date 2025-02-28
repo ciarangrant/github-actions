@@ -26,6 +26,10 @@ jobs:
   parse_content:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs: 
+      repo_name: ${{ steps.parse-content.outputs.repo_name }}
+      creator: ${{ steps.parse-content.outputs.creator }}
+      timestamp: ${{ steps.parse-content.outputs.timestamp }}
     needs: get_file_content
     steps:
       - name: Parse File Content
