@@ -45,7 +45,7 @@ jobs:
         id: get-content
         # Run only if file_exists output is 'true'
         if: steps.check-file.outputs.exists == 'true' 
-          && needs.get_file_content.outputs.branch_in_title == 'true'
+          && steps.check-branch-name.outputs.branch_in_title == 'true'
         run: |
           CONTENT=$(tail -n 1 terraform-deployments/external-project-roles/projects.txt)
           echo "content=$CONTENT" >> $GITHUB_OUTPUT 
