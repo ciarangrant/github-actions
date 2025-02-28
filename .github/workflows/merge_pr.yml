@@ -16,7 +16,7 @@ jobs:
       - name: Get Last Line of File
         id: get-content
         run: |
-          CONTENT=$(tail -n 1 my_file.txt)
+          CONTENT=$(tail -n 1 terraform-deployments/external-project-roles/projects.txt)
           echo "content=$CONTENT" >> $GITHUB_OUTPUT 
 
   parse-content:
