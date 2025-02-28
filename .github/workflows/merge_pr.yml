@@ -35,7 +35,7 @@ jobs:
 
   parse-content:
     # Run only if file_exists output is 'true'
-    if: steps.check-file.outputs.exists == 'true'
+    if: needs.get_file_content.outputs.file_exists == 'true'
     runs-on: ubuntu-latest
     needs: get-file-content
     outputs:
@@ -61,7 +61,7 @@ jobs:
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
 
   notify-slack:
-    if: steps.check-file.outputs.exists == 'true'
+    if: needs.get_file_content.outputs.file_exists == 'true'
     runs-on: ubuntu-latest
     needs: [get-file-content, parse-content] 
     steps:
