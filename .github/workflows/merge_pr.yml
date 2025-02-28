@@ -20,6 +20,7 @@ jobs:
         id: get-content
         run: |
           CONTENT=$(tail -n 1 my_file.txt)
+          echo "content=$CONTENT"
           echo "content=$CONTENT" >> $GITHUB_OUTPUT 
 
   parse_content:
@@ -34,7 +35,10 @@ jobs:
           TIMESTAMP="${LAST_LINE%%,*}" 
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
-          CREATOR="${LAST_LINE##*,}"    
+          CREATOR="${LAST_LINE##*,}"  
+          echo "timestamp=$TIMESTAMP"
+          echo "repo_name=$REPO_NAME"
+          echo "creator=$CREATOR"
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
