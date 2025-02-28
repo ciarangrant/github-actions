@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
 jobs:
-  get_file_content:
+  get-file-content:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
@@ -19,10 +19,10 @@ jobs:
           CONTENT=$(tail -n 1 my_file.txt)
           echo "content=$CONTENT" >> $GITHUB_OUTPUT 
 
-  parse_content:
+  parse-content:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    needs: get_file_content
+    needs: get-file-content
     outputs:
       repo_name: ${{ steps.parse-content.outputs.repo_name }}
       creator: ${{ steps.parse-content.outputs.creator }}
@@ -31,11 +31,15 @@ jobs:
       - name: Parse File Content
         id: parse-content
         run: |
-          LAST_LINE="${{ needs.get_file_content.outputs.file_content }}"
+          LAST_LINE="${{ needs.get-file-content.outputs.file_content }}"
           TIMESTAMP="${LAST_LINE%%,*}" 
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
-          CREATOR="${LAST_LINE##*,}"    
+          CREATOR="${LAST_LINE##*,}"
+          echo "lastline=$LAST_LINE"
+          echo "timestamp=$TIMESTAMP"
+          echo "repo_name=$REPO_NAME"
+          echo "creator=$CREATOR"
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
@@ -43,7 +47,7 @@ jobs:
   notify-slack:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    needs: [get_file_content, parse_content] 
+    needs: [get-file-content, parse-content] 
     steps:
       - name: Slack Notification (App)
         run: |
