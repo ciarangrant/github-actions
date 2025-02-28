@@ -1,9 +1,7 @@
 name: PR Merged Notification with File Content
-
 on:
- pull_request:
-   types: [closed]
-
+  pull_request:
+    types: [closed]
 jobs:
   get_file_content:
     if: github.event.pull_request.merged == true
@@ -15,22 +13,20 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.base.ref }} 
-
       - name: Get Last Line of File
         id: get-content
         run: |
           CONTENT=$(tail -n 1 my_file.txt)
-          echo "content=$CONTENT"
           echo "content=$CONTENT" >> $GITHUB_OUTPUT 
 
   parse_content:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    outputs: 
+    needs: get_file_content
+    outputs:
       repo_name: ${{ steps.parse-content.outputs.repo_name }}
       creator: ${{ steps.parse-content.outputs.creator }}
       timestamp: ${{ steps.parse-content.outputs.timestamp }}
-    needs: get_file_content
     steps:
       - name: Parse File Content
         id: parse-content
@@ -39,10 +35,7 @@ jobs:
           TIMESTAMP="${LAST_LINE%%,*}" 
           REPO_NAME="${LAST_LINE#*,}"   
           REPO_NAME="${REPO_NAME%%,*}" 
-          CREATOR="${LAST_LINE##*,}"  
-          echo "timestamp=$TIMESTAMP"
-          echo "repo_name=$REPO_NAME"
-          echo "creator=$CREATOR"
+          CREATOR="${LAST_LINE##*,}"    
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "creator=$CREATOR" >> $GITHUB_OUTPUT
@@ -54,4 +47,4 @@ jobs:
     steps:
       - name: Slack Notification (App)
         run: |
-          echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}"
+          echo "Repository ${{ steps.parse-content.outputs.repo_name }} has been created by ${{ steps.parse-content.outputs.creator }} at ${{ steps.parse-content.outputs.timestamp }}" 
