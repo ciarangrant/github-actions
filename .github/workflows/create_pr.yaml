@@ -1,0 +1,84 @@
+name: PR Merged Notification
+
+on:
+ pull_request:
+    types: [create]
+
+jobs:
+  process-and-notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Target Branch 
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.ref }} 
+
+      - name: Check Branch Name in PR Title
+        id: check-branch-name
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          BRANCH_NAME="${BRANCH_NAME##*/}" 
+          if echo "${{ github.event.pull_request.title }}" | grep -q "$BRANCH_NAME" ; then
+            echo "branch_in_title=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::Branch name not found in PR title. Skipping notification."
+            echo "branch_in_title=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if File Exists and Process
+        id: process-file
+        if: steps.check-branch-name.outputs.branch_in_title == 'true'
+        run: |
+          if [[ -f "terraform-deployments/external-project-roles/projects.txt" ]]; then
+            echo "File 'terraform-deployments/external-project-roles/projects.txt' found."
+            LAST_LINE=$(tail -n 1 terraform-deployments/external-project-roles/projects.txt)
+            TIMESTAMP="${LAST_LINE%%,*}" 
+            REPO_NAME="${LAST_LINE#*,}"   
+            REPO_NAME="${REPO_NAME%%,*}" 
+            OWNER_FULL="${LAST_LINE##*,}"
+            OWNER="${OWNER_FULL##*/}"
+
+            # Validations
+            if [[ -z "$TIMESTAMP" || -z "$REPO_NAME" || -z "$OWNER" ]]; then
+              echo "::warning::One or more required values are blank. Skipping notification."
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            if [[ $(echo "$LAST_LINE" | grep -o ',' | wc -l) -ne 2 ]]; then
+              echo "::warning::The text from projects.txt does not have exactly two commas. Skipping notification."
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            if ! echo "$OWNER_FULL" | grep -q '/'; then
+              echo "::warning::Username is in an invalid format. Skipping notification."
+              echo "validation_passed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # Set outputs for notification if all checks pass
+            echo "validation_passed=true" >> $GITHUB_OUTPUT
+            echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+            echo "owner=$OWNER" >> $GITHUB_OUTPUT
+            echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::File 'terraform-deployments/external-project-roles/projects.txt' not found. Skipping notification."
+            echo "validation_passed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+      - name: Check Message
+        if: steps.check-branch-name.outputs.branch_in_title == 'true' && steps.process-file.outputs.validation_passed == 'true'
+        run: |
+          echo "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}" 
+
+      - name: Slack Notification (App)
+        if: steps.check-branch-name.outputs.branch_in_title == 'true' && steps.process-file.outputs.validation_passed == 'true'
+        run: |
+          curl -X POST -H 'Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}' \
+               -H 'Content-type: application/json' \
+               --data '{
+                 "channel": "#testing",
+                 "text": "Repository ${{ steps.process-file.outputs.repo_name }} has been created by ${{ steps.process-file.outputs.owner }} at ${{ steps.process-file.outputs.timestamp }}"
+               }' \
+               https://slack.com/api/chat.postMessage
