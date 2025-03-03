@@ -6,7 +6,6 @@ on:
 
 jobs:
   process-and-notify:
-    if ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Target Branch 
