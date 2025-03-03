@@ -1,8 +1,8 @@
-name: PR Merged Notification
+name: PR Creation Notification
 
 on:
  pull_request:
-    types: [create]
+    types: [opened]
 
 jobs:
   process-and-notify:
