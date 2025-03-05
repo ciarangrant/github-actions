@@ -24,7 +24,7 @@ jobs:
             echo "::warning::Branch name not found in PR title. Skipping notification."
             echo "branch_in_title=false" >> $GITHUB_OUTPUT
           fi
-          URL="${{ github.event.pull_request.html }}"
+          URL="${{ github.event.pull_request.url }}"
           echo $URL
 
       - name: Check if File Exists and Process
