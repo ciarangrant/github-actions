@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Source Branch 
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }} 
+          ref: ${{ github.ref }} 
 
       - name: Check Branch Name in PR Title
         id: check-branch-name
