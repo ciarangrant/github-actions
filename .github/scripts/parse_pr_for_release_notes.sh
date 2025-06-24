@@ -16,6 +16,15 @@
 PR_BODY=$(cat -)
 START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
+END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
+# Only process END_MARKER_RAW if it was actually provided (i.e., it's not an empty string)
+if [ -n "$END_MARKER_RAW" ]; then
+  # Escape potential regex special characters in the raw end marker for safety.
+  # This makes sure symbols like # . * + ? ( ) etc. are treated literally, not as regex.
+  ESCAPED_END_MARKER_RAW=$(echo "$END_MARKER_RAW" | sed 's/[][\\.*+?$(){}^|]/\\&/g')
+  # Convert the escaped end marker to lowercase and assign as the pattern
+  END_MARKER_PATTERN=$(echo "$ESCAPED_END_MARKER_RAW" | tr '[:upper:]' '[:lower:]')
+fi
 
 FULL_RELEASE_NOTES=""
 found_marker=false    
@@ -32,9 +41,12 @@ while IFS= read -r line; do
   fi
 
   if [ "$found_marker" = true ]; then
-    if [[ "$trimmed_line" =~ ^"$END_MARKER"(.*)$ ]]; then
-      # Found the start of an app-specific section, so stop collecting default notes.
-      break # Exit the while loop
+    # --- IMPORTANT FIX: Only perform regex match if END_MARKER_PATTERN is not empty ---
+    if [ -n "$END_MARKER_PATTERN" ]; then 
+      # The regex check: matches if trimmed line starts with the END_MARKER_PATTERN
+      if [[ "$trimmed_line_lower" =~ ^"$END_MARKER_PATTERN"(.*)$ ]]; then
+        break # Exit the while loop if end marker is found
+      fi
     fi
     # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
     # Use the original 'line' variable here to keep all original whitespace as required
