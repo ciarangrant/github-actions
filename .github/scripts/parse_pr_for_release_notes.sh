@@ -18,5 +18,7 @@ START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
 echo $PR_BODY
+echo "============"
 echo $START_MARKER
-echo $ END_MARKER
+echo "------------"
+echo $END_MARKER
