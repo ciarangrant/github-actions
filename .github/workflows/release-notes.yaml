@@ -45,7 +45,7 @@ jobs:
               if [ -z "$FULL_RELEASE_NOTES" ]; then
                 FULL_RELEASE_NOTES="$line" # First line after marker
               else
-                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
+                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$trimmed_line" # Subsequent lines
               fi
             fi
           done <<< "$PR_BODY" # Feed the PR_BODY into the while loop as its input
