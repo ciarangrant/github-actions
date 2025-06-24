@@ -19,7 +19,7 @@ jobs:
         run: |
           pwd
           ls -ltra
-          chmod +x ./scripts/parse_pr_for_release_notes.sh
+          chmod +x ./.github/scripts/parse_pr_for_release_notes.sh
 
       - name: Extract Release Notes Content Line by Line
         id: extract_notes
