@@ -76,22 +76,6 @@ jobs:
 
       - name: Get custom Release Notes
         run: |
-          #echo "${{ steps.extract_notes.outputs.full_release_notes_content }}"
-          #echo "-------"
-          #echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"
-          #echo "----------------"
-          #echo "${{ env.FULL_RELEASE_NOTES }}"
-          #echo "-------"
-          #echo "${{ env.DEFAULT_RELEASE_NOTES }}"
           CUSTOM_APPS="app2 app3"
           echo "$CUSTOM_APPS"
-          for app_name in $CUSTOM_APPS; do
-            echo "Processing app: $app_name"
-            FULL_APP_HEADING="### Release Notes for ${app_name}"
-            #if echo "${{ env.FULL_RELEASE_NOTES }}" | grep -qFi "$FULL_APP_HEADING"; then
-            echo "  --> VALID: Found custom release notes section for '$app_name' within the scope."
-              
-            #else
-            #echo "  --> INVALID/NOT_FOUND: No custom release notes section found for '$app_name' within the scope."
-            #fi
-           done
+          
