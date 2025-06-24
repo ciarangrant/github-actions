@@ -34,6 +34,9 @@ jobs:
             #echo "FULL_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
+          echo "AAAAAAAAAAAAA"
+          echo "$FULL_RELEASE_NOTES"
+          echo "AAAAAAAAAAAAA"
           
           # get the default release note section i.e. minus any custom notes
           START_MARKER="## release notes" # ignoring case in the string to match
@@ -44,6 +47,9 @@ jobs:
             #echo "DEFAULT_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
+          echo "BBBBBBBBBBBB"
+          echo "$DEFAULT_RELEASE_NOTES"
+          echo "BBBBBBBBBBBB"
           
           #echo "Extracted Content (Full):"
           #echo "$FULL_RELEASE_NOTES"
