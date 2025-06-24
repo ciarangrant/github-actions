@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Output Pull Request Body
-        id: output_pr_body # Add an ID to the step if you want to use its outputs
+        id: output_pr_body 
         run: |
           echo "--- Pull Request Body ---"
           echo "${{ github.event.pull_request.body }}"
