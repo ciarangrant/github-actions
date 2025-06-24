@@ -32,7 +32,7 @@ while IFS= read -r line; do
   fi
 
   if [ "$found_marker" = true ]; then
-    if [[ "$trimmed_line_lower" =~ ^"$END_MARKER_PATTERN"(.*)$ ]]; then
+    if [[ "$trimmed_line" =~ ^"$END_MARKER"(.*)$ ]]; then
       break # Exit the while loop if end marker is found
     fi
     # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
