@@ -17,12 +17,6 @@ TEXT_TO_PARSE=$(cat -)
 START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
-echo "$TEXT_TO_PARSE"
-echo "============"
-echo "$START_MARKER"
-echo "------------"
-echo "$END_MARKER"
-echo "++++++++++++"
 
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
