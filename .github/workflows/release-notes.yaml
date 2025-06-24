@@ -84,4 +84,5 @@ jobs:
           echo "${{ steps.extract_notes.outputs.release_notes_content }}"\
           echo "-------"
           echo "${{ env.FINAL_OUTPUT }}"
-          
+          CUSTOM_APPS="app2 app3"
+          echo "$CUSTOM_APPS"
