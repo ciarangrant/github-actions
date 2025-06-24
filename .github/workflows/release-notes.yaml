@@ -52,7 +52,7 @@ jobs:
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_OUTPUT
           echo "EOF_FULL" >> $GITHUB_OUTPUT
           # Also set the full extracted content as an env var
-          echo "FULL_RELEASE_NOTES_ENV<<EOT_FULL" >> $GITHUB_ENV
+          echo "FULL_RELEASE_NOTES<<EOT_FULL" >> $GITHUB_ENV
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOT_FULL" >> $GITHUB_ENV
     
