@@ -17,19 +17,8 @@ PR_BODY="$1"
 START_MARKER="$2" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$3"   # Optional: Renamed to avoid conflict
 
-echo "A"
-echo "$PR_BODY"
-echo "B"
-echo "$START_MARKER"
-echo "C"
-echo "$END_MARKER"
 
-# --- Input Validation ---
-if [ -z "$PR_BODY" ] || [ -z "$START_MARKER" ]; then
-  echo "Usage: $0 <text_to_search> <start_marker> [end_marker]" >&2
-  exit 1
-fi
-
+echo "______ START ________"
 FULL_RELEASE_NOTES=""
 found_marker=false    
 
@@ -39,13 +28,13 @@ while IFS= read -r line; do
   trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
   # Convert to lower case so can ignore case on string to match
   trimmed_line=$(echo "$trimmed_line" | tr '[:upper:]' '[:lower:]')
-  if [ "$trimmed_line" = "$MARKER" ]; then
+  if [ "$trimmed_line" = "$START_MARKER" ]; then
     found_marker=true 
     continue
   fi
 
   if [ "$found_marker" = true ]; then
-    if [[ "$trimmed_line" =~ ^"$END_MARKER_PREFIX"(.*)$ ]]; then
+    if [[ "$trimmed_line" =~ ^"$END_MARKER"(.*)$ ]]; then
       # Found the start of an app-specific section, so stop collecting default notes.
       break # Exit the while loop
     fi
@@ -73,4 +62,7 @@ if [ -z "$FULL_RELEASE_NOTES" ]; then
   exit 1
 else
   FINAL_OUTPUT="$FULL_RELEASE_NOTES"
+  # Otherwise, output the cleaned content
+  echo "$FINAL_OUTPUT" 
+  exit 0
 fi
