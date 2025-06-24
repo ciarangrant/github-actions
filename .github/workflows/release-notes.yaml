@@ -20,7 +20,6 @@ jobs:
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
           MARKER="## release notes" # ignoring case in the string to match
-          echo "$MARKER"
           FULL_RELEASE_NOTES=""
           found_marker=false    
 
@@ -30,7 +29,6 @@ jobs:
             trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
             # Convert to lower case so can ignore case on string to match
             trimmed_line=$(echo "$trimmed_line" | tr '[:upper:]' '[:lower:]')
-            echo "$trimmed_line"
             if [ "$trimmed_line" = "$MARKER" ]; then
               found_marker=true 
               continue
