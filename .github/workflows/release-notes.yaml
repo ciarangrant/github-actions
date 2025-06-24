@@ -79,5 +79,7 @@ jobs:
           CUSTOM_APPS="app2 app3"
           for app_name in $CUSTOM_APPS; do
             echo "Processing app: $app_name"
-          done
+            FULL_APP_HEADING="### Release Notes for ${app_name}"
+            
+           done
           
