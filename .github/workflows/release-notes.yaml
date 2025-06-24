@@ -28,25 +28,25 @@ jobs:
           START_MARKER="## release notes" # ignoring case in the string to match
           END_MARKER="### release notes for"
 
-          FINAL_OUTPUT=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
+          DEFAULT_RELEASE_NOTES=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
           
           if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
             echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required."
-            echo "FINAL_OUTPUT=" >> $GITHUB_OUTPUT 
+            echo "DEFAULT_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
           
           echo "Extracted Content:"
-          echo "$FINAL_OUTPUT"
+          echo "$DEFAULT_RELEASE_NOTES"
 
           # Set the extracted content as a step output
           echo "release_notes_content<<EOF" >> $GITHUB_OUTPUT
-          echo "$FINAL_OUTPUT" >> $GITHUB_OUTPUT
+          echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
           # Also set the extracted content as an env var
-          echo "FINAL_OUTPUT<<EOT" >> $GITHUB_ENV 
-          echo "$FINAL_OUTPUT" >> $GITHUB_ENV     
+          echo "DEFAULT_RELEASE_NOTES<<EOT" >> $GITHUB_ENV 
+          echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_ENV     
           echo "EOT" >> $GITHUB_ENV
 
       - name: Display Extracted Notes (from step output)
@@ -58,13 +58,13 @@ jobs:
         run: |
           echo "${{ steps.extract_notes.outputs.release_notes_content }}"\
           echo "-------"
-          echo "${{ env.FINAL_OUTPUT }}"
+          echo "${{ env.DEFAULT_RELEASE_NOTES }}"
           CUSTOM_APPS="app2 app3"
           echo "$CUSTOM_APPS"
           for app_name in $CUSTOM_APPS; do
             echo "Processing app: '$app_name'"
             FULL_APP_HEADING="### Release Notes for ${app_name}"
-            if echo "${{ env.FINAL_OUTPUT }}" | grep -qFi "$FULL_APP_HEADING"; then
+            if echo "${{ env.DEFAULT_RELEASE_NOTES }}" | grep -qFi "$FULL_APP_HEADING"; then
               echo "  --> VALID: Found custom release notes section for '$app_name' within the scope."
               
             else
