@@ -45,8 +45,8 @@ jobs:
             exit 1 # Fail the step
           fi
           
-          echo "Extracted Content (Full):"
-          echo "$FULL_RELEASE_NOTES"
+          #echo "Extracted Content (Full):"
+          #echo "$FULL_RELEASE_NOTES"
           # Set the full extracted content as a step output
           echo "full_release_notes_content<<EOF_FULL" >> $GITHUB_OUTPUT
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_OUTPUT
@@ -56,8 +56,8 @@ jobs:
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOT_FULL" >> $GITHUB_ENV
     
-          echo "Extracted Content (Default):"
-          echo "$DEFAULT_RELEASE_NOTES"
+          #echo "Extracted Content (Default):"
+          #echo "$DEFAULT_RELEASE_NOTES"
           # Set the default extracted content as a step output
           echo "default_release_notes_content<<EOF" >> $GITHUB_OUTPUT
           echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_OUTPUT
@@ -67,12 +67,12 @@ jobs:
           echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_ENV     
           echo "EOT" >> $GITHUB_ENV
 
-      - name: Display Extracted Notes (from step output)
-        run: |
-          echo "--- Full Release Notes from Output (Line by Line Method) ---"
-          echo "${{ steps.extract_notes.outputs.full_release_notes_content }}"
-          echo "--- Default Release Notes from Output (Line by Line Method) ---"
-          echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"
+      #- name: Display Extracted Notes (from step output)
+       # run: |
+        #  echo "--- Full Release Notes from Output (Line by Line Method) ---"
+         # echo "${{ steps.extract_notes.outputs.full_release_notes_content }}"
+          #echo "--- Default Release Notes from Output (Line by Line Method) ---"
+          #echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"
 
       - name: Get custom Release Notes
         run: |
@@ -81,7 +81,7 @@ jobs:
             echo "Processing app: $app_name"
             FULL_APP_HEADING="### Release Notes for ${app_name}"
             if echo "${{ env.FULL_RELEASE_NOTES }}" | grep -qFi "$FULL_APP_HEADING"; then
-              echo "  --> VALID: Found custom release notes section for '$app_name'"
+              #echo "  --> VALID: Found custom release notes section for '$app_name'"
               # get the custom release note section i.e. default and any custom notes
               START_MARKER="$FULL_APP_HEADING" # ignoring case in the string to match
               END_MARKER="### Release Notes for"
