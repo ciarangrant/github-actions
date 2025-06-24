@@ -65,10 +65,12 @@ jobs:
           echo "$FINAL_OUTPUT"
 
           # Set the extracted content as a step output
-          echo "FINAL_OUTPUT=$FINAL_OUTPUT" >> $GITHUB_ENV
           echo "release_notes_content<<EOF" >> $GITHUB_OUTPUT
           echo "$FINAL_OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+          # Also set the extracted content as an env var
+          echo "FINAL_OUTPUT=$FINAL_OUTPUT" >> $GITHUB_ENV
 
       - name: Display Extracted Notes (from step output)
         run: |
