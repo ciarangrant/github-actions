@@ -19,48 +19,39 @@ jobs:
         id: extract_notes
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
-          MARKER="## Release Notes" # The target string to match
+          MARKER="## release notes" # ignoring case in the string to match
 
-          FULL_RELEASE_NOTES="" # Initialize the variable to store the notes
-          found_marker=false    # Boolean flag to track if we've found the marker
+          FULL_RELEASE_NOTES=""
+          found_marker=false    
 
           # Read PR_BODY line by line using process substitution and while loop
           # IFS= read -r line ensures correct line reading, preserving leading/trailing spaces
           while IFS= read -r line; do
-            # Trim the current line (left and right)
-            # ${line##*[^[:space:]]}: Removes leading whitespace
-            # ${line%%[[:space:]]*} : Removes trailing whitespace
-            # For simplicity and robust trimming across platforms/shells:
             trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
-            # The 's/\r$//' part removes Windows-style carriage returns if present
-
+            # Convert to lower case so can ignore case on string to match
+            trimmed_line_lower=$(echo "$trimmed_line" | tr '[:upper:]' '[:lower:]')
             if [ "$trimmed_line" = "$MARKER" ]; then
-              found_marker=true # We found the marker, start storing from next line
-              continue          # Skip to the next line immediately after finding the marker
+              found_marker=true 
+              continue
             fi
 
             if [ "$found_marker" = true ]; then
               # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
-              # We use the original 'line' variable here to keep all original whitespace as required
+              # Use the original 'line' variable here to keep all original whitespace as required
               if [ -z "$FULL_RELEASE_NOTES" ]; then
-                FULL_RELEASE_NOTES="$line" # First line after marker
+                FULL_RELEASE_NOTES="$line" 
               else
                 FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
               fi
             fi
-          done <<< "$PR_BODY" # Feed the PR_BODY into the while loop as its input
+          done <<< "$PR_BODY" 
 
-          # --- Post-processing after the loop ---
-          # Optional: If you need to remove initial blank lines from the extracted notes
-          # and then also trim trailing blank lines (often desirable for clean output)
+          # Trim preceding and trailing blank lines
           FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-          #  check if the release notes are effectively blank eg only contain blank lines
+          # Check if the release notes are effectively blank eg only contain blank lines
           if ! echo "$FULL_RELEASE_NOTES" | grep -qE '[^[:space:]]'; then
             FULL_RELEASE_NOTES=""
           fi  
-          echo "_________________"
-          echo "$FULL_RELEASE_NOTES"
-          echo "_________________"
 
           # Check if notes were found at all
           if [ -z "$FULL_RELEASE_NOTES" ]; then
@@ -71,7 +62,7 @@ jobs:
             FINAL_OUTPUT="$FULL_RELEASE_NOTES"
           fi
 
-          echo "Extracted Content (Raw - Line by Line Method):"
+          echo "Extracted Content:"
           echo "$FINAL_OUTPUT"
 
           # Set the extracted content as a step output
