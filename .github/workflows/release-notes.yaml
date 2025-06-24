@@ -20,7 +20,7 @@ jobs:
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
           START_MARKER="## release notes" # ignoring case in the string to match
-          END_MARKER_PREFIX="### release notes for "
+          END_MARKER_PREFIX="### release notes for"
           FULL_RELEASE_NOTES=""
           found_marker=false    
 
@@ -36,7 +36,7 @@ jobs:
             fi
 
             if [ "$found_marker" = true ]; then
-              if [[ "$trimmed_line_lower" =~ ^"$END_MARKER_PREFIX"(.*)$ ]]; then
+              if [[ "$trimmed_line" =~ ^"$END_MARKER_PREFIX"(.*)$ ]]; then
                 # Found the start of an app-specific section, so stop collecting default notes.
                 break # Exit the while loop
               fi
