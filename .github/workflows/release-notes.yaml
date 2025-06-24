@@ -76,6 +76,7 @@ jobs:
 
       - name: Get custom Release Notes
         run: |
-          echo "${{ steps.extract_notes.outputs.release_notes_content }}"
-          echo "$FINAL_OUTPUT"
+          echo "${{ steps.extract_notes.outputs.release_notes_content }}"\
+          echo "-------"
+          echo "${{ env.FINAL_OUTPUT }}"
           
