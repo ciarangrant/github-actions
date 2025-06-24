@@ -53,9 +53,7 @@ jobs:
           # --- Post-processing after the loop ---
           # Optional: If you need to remove initial blank lines from the extracted notes
           # and then also trim trailing blank lines (often desirable for clean output)
-          if [ -n "$FULL_RELEASE_NOTES" ]; then
-            FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-          fi
+          FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
 
           echo "_________________"
           echo "$FULL_RELEASE_NOTES"
