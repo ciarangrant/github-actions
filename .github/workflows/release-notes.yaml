@@ -12,37 +12,69 @@ jobs:
   extract_release_notes:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code (optional, but good practice)
+      - name: Checkout code (optional)
         uses: actions/checkout@v4
 
-      - name: Extract Release Notes Content (No Trim)
-        id: extract_notes # Give this step an ID to access its outputs
+      - name: Extract Release Notes Content Line by Line
+        id: extract_notes
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
-          echo "-------------"
-          echo $PR_BODY
-          echo "-------------"
-          
-          # Define the marker you're looking for
-          MARKER=" ## Release Notes"
-          EXTRACTED_CONTENT=$(echo -e "$PR_BODY" | awk -v marker="$MARKER" 'f{print}; $0 == marker{f=1}')
-          # If nothing was extracted (e.g., the marker wasn't found, or no content after), default to empty.
-          if [ -z "$EXTRACTED_CONTENT" ]; then
-            echo "No content found after '## Release Notes' or marker not present."
-            FINAL_NOTES=""
+          MARKER="## Release Notes" # The target string to match
+
+          FULL_RELEASE_NOTES="" # Initialize the variable to store the notes
+          found_marker=false    # Boolean flag to track if we've found the marker
+
+          # Read PR_BODY line by line using process substitution and while loop
+          # IFS= read -r line ensures correct line reading, preserving leading/trailing spaces
+          while IFS= read -r line; do
+            # Trim the current line (left and right)
+            # ${line##*[^[:space:]]}: Removes leading whitespace
+            # ${line%%[[:space:]]*} : Removes trailing whitespace
+            # For simplicity and robust trimming across platforms/shells:
+            trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
+            # The 's/\r$//' part removes Windows-style carriage returns if present
+
+            if [ "$trimmed_line" = "$MARKER" ]; then
+              found_marker=true # We found the marker, start storing from next line
+              continue          # Skip to the next line immediately after finding the marker
+            fi
+
+            if [ "$found_marker" = true ]; then
+              # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
+              # We use the original 'line' variable here to keep all original whitespace as required
+              if [ -z "$FULL_RELEASE_NOTES" ]; then
+                FULL_RELEASE_NOTES="$line" # First line after marker
+              else
+                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
+              fi
+            fi
+          done <<< "$PR_BODY" # Feed the PR_BODY into the while loop as its input
+
+          # --- Post-processing after the loop ---
+          # Optional: If you need to remove initial blank lines from the extracted notes
+          # and then also trim trailing blank lines (often desirable for clean output)
+          # if [ -n "$FULL_RELEASE_NOTES" ]; then
+          #   FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          # fi
+
+          # Check if notes were found at all
+          if [ -z "$FULL_RELEASE_NOTES" ]; then
+            echo "::warning::No content found after '## Release Notes' or marker not present, or only blank lines."
+            FINAL_OUTPUT="" # Ensure it's an empty string if nothing valid was found
           else
-            FINAL_NOTES="$EXTRACTED_CONTENT"
+            FINAL_OUTPUT="$FULL_RELEASE_NOTES"
           fi
-          echo "Extracted Content (Raw):"
-          echo "$FINAL_NOTES"
+
+          echo "Extracted Content (Raw - Line by Line Method):"
+          echo "$FINAL_OUTPUT"
 
           # Set the extracted content as a step output
           echo "release_notes_content<<EOF" >> $GITHUB_OUTPUT
-          echo "$FINAL_NOTES" >> $GITHUB_OUTPUT
+          echo "$FINAL_OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Display Extracted Notes (from step output)
         run: |
-          echo "--- Final Release Notes from Output (Raw) ---"
+          echo "--- Final Release Notes from Output (Line by Line Method) ---"
           echo "${{ steps.extract_notes.outputs.release_notes_content }}"
           echo "-------------------------------------"
