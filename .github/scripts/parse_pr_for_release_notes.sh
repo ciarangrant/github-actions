@@ -17,6 +17,13 @@ PR_BODY="$1"
 START_MARKER="$2" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$3"   # Optional: Renamed to avoid conflict
 
+echo "A"
+echo "$PR_BODY"
+echo "B"
+echo "$START_MARKER"
+echo "C"
+echo "$END_MARKER"
+
 # --- Input Validation ---
 if [ -z "$PR_BODY" ] || [ ! -f "$PR_BODY" ] || [ -z "$START_MARKER" ]; then
   echo "Usage: $0 <text_to_search> <start_marker> [end_marker]" >&2
