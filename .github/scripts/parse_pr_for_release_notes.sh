@@ -17,14 +17,6 @@ PR_BODY=$(cat -)
 START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
 
-echo "A"
-echo "$PR_BODY"
-echo "B"
-echo "$START_MARKER"
-echo "C"
-echo "$END_MARKER"
-
-echo "______ START ________"
 FULL_RELEASE_NOTES=""
 found_marker=false    
 
