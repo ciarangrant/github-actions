@@ -55,7 +55,7 @@ jobs:
           # and then also trim trailing blank lines (often desirable for clean output)
           FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
           #  check if the release notes are effectively blank eg only contain blank lines
-          if [ -z "$(echo "$FULL_RELEASE_NOTES" | xargs)" ]; then
+          if ! echo "$FULL_RELEASE_NOTES" | grep -qE '[^[:space:]]'; then
             FULL_RELEASE_NOTES=""
           fi  
           echo "_________________"
