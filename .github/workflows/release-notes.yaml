@@ -45,7 +45,7 @@ jobs:
               if [ -z "$FULL_RELEASE_NOTES" ]; then
                 FULL_RELEASE_NOTES="$line" # First line after marker
               else
-                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$trimmed_line" # Subsequent lines
+                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
               fi
             fi
           done <<< "$PR_BODY" # Feed the PR_BODY into the while loop as its input
@@ -53,9 +53,13 @@ jobs:
           # --- Post-processing after the loop ---
           # Optional: If you need to remove initial blank lines from the extracted notes
           # and then also trim trailing blank lines (often desirable for clean output)
-          # if [ -n "$FULL_RELEASE_NOTES" ]; then
-          #   FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-          # fi
+          if [ -n "$FULL_RELEASE_NOTES" ]; then
+            FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          fi
+
+          echo "_________________"
+          echo "$FULL_RELEASE_NOTES"
+          echo "_________________"
 
           # Check if notes were found at all
           if [ -z "$FULL_RELEASE_NOTES" ]; then
@@ -78,4 +82,4 @@ jobs:
         run: |
           echo "--- Final Release Notes from Output (Line by Line Method) ---"
           echo "${{ steps.extract_notes.outputs.release_notes_content }}"
-          echo "-------------------------------------"
+          
