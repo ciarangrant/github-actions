@@ -15,57 +15,24 @@ jobs:
       - name: Checkout code (optional)
         uses: actions/checkout@v4
 
+      - name: Make script executable
+        run: chmod +x ./scripts/parse_pr_for_release_notes.sh
+
       - name: Extract Release Notes Content Line by Line
         id: extract_notes
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
           START_MARKER="## release notes" # ignoring case in the string to match
-          END_MARKER_PREFIX="### release notes for"
-          FULL_RELEASE_NOTES=""
-          found_marker=false    
+          END_MARKER="### release notes for"
 
-          # Read PR_BODY line by line using process substitution and while loop
-          # IFS= read -r line ensures correct line reading, preserving leading/trailing spaces
-          while IFS= read -r line; do
-            trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
-            # Convert to lower case so can ignore case on string to match
-            trimmed_line=$(echo "$trimmed_line" | tr '[:upper:]' '[:lower:]')
-            if [ "$trimmed_line" = "$MARKER" ]; then
-              found_marker=true 
-              continue
-            fi
-
-            if [ "$found_marker" = true ]; then
-              if [[ "$trimmed_line" =~ ^"$END_MARKER_PREFIX"(.*)$ ]]; then
-                # Found the start of an app-specific section, so stop collecting default notes.
-                break # Exit the while loop
-              fi
-              # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
-              # Use the original 'line' variable here to keep all original whitespace as required
-              if [ -z "$FULL_RELEASE_NOTES" ]; then
-                FULL_RELEASE_NOTES="$line" 
-              else
-                FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
-              fi
-            fi
-          done <<< "$PR_BODY" 
-
-          # Trim preceding and trailing blank lines
-          FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-          # Check if the release notes are effectively blank eg only contain blank lines
-          if ! echo "$FULL_RELEASE_NOTES" | grep -qE '[^[:space:]]'; then
-            FULL_RELEASE_NOTES=""
-          fi  
-
-          # Check if notes were found at all
-          if [ -z "$FULL_RELEASE_NOTES" ]; then
-            echo "ERROR: No content found after '## Release Notes', '## Release Notes' not present, or only blank lines."
-            FINAL_OUTPUT="" # Ensure it's an empty string if nothing valid was found
-            exit 1
-          else
-            FINAL_OUTPUT="$FULL_RELEASE_NOTES"
+          FINAL_OUTPUT=$(./scripts/extract_section.sh pr_body.md "$START_MARKER" "$END_MARKER")
+          
+          if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
+            echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required."
+            echo "default_release_notes=" >> $GITHUB_OUTPUT 
+            exit 1 # Fail the step
           fi
-
+          
           echo "Extracted Content:"
           echo "$FINAL_OUTPUT"
 
