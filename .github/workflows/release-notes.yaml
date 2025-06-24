@@ -1,28 +1,45 @@
-name: Get PR Body
+name: Get PR Release Notes
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
 
 jobs:
-  log_pr_body:
+  extract_release_notes:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code (optional, but good practice)
         uses: actions/checkout@v4
 
-      - name: Output Pull Request Body
-        id: output_pr_body 
+      - name: Extract Release Notes Content (No Trim)
+        id: extract_notes # Give this step an ID to access its outputs
         run: |
-          echo "--- Pull Request Body ---"
-          echo "${{ github.event.pull_request.body }}"
-          echo "-----------------------"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Define the marker you're looking for
+          MARKER="## Release Notes"
+          EXTRACTED_CONTENT=$(echo -e "$PR_BODY" | awk -v marker="$MARKER" 'f{print}; $0 == marker{f=1}')
+          # If nothing was extracted (e.g., the marker wasn't found, or no content after), default to empty.
+          if [ -z "$EXTRACTED_CONTENT" ]; then
+            echo "No content found after '## Release Notes' or marker not present."
+            FINAL_NOTES=""
+          else
+            FINAL_NOTES="$EXTRACTED_CONTENT"
+          fi
+          echo "Extracted Content (Raw):"
+          echo "$FINAL_NOTES"
 
-          echo "pr_body_output<<EOF" >> $GITHUB_OUTPUT
-          echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
+          # Set the extracted content as a step output
+          echo "release_notes_content<<EOF" >> $GITHUB_OUTPUT
+          echo "$FINAL_NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Access PR Body from step output (example)
+      - name: Display Extracted Notes (from step output)
         run: |
-          echo "The PR body from step output is:"
-          echo "${{ steps.output_pr_body.outputs.pr_body_output }}"
+          echo "--- Final Release Notes from Output (Raw) ---"
+          echo "${{ steps.extract_notes.outputs.release_notes_content }}"
+          echo "-------------------------------------"
