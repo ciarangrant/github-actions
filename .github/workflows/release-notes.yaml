@@ -19,6 +19,9 @@ jobs:
         id: extract_notes # Give this step an ID to access its outputs
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
+          echo "-------------"
+          echo $PR_BODY
+          echo "-------------"
           
           # Define the marker you're looking for
           MARKER="## Release Notes"
