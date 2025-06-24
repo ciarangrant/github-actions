@@ -88,11 +88,10 @@ jobs:
           echo "$CUSTOM_APPS"
           for app_name in $CUSTOM_APPS; do
             echo "Processing app: '$app_name'"
-            FULL_APP_HEADING="### ${app_name}"
+            FULL_APP_HEADING="### Release Notes for ${app_name}"
             if echo "${{ env.FINAL_OUTPUT }}" | grep -qFi "$FULL_APP_HEADING"; then
               echo "  --> VALID: Found custom release notes section for '$app_name' within the scope."
-              # You could set an output here to indicate which apps have custom notes
-              # e.g., echo "HAS_CUSTOM_NOTES_${app_name^^}=true" >> $GITHUB_OUTPUT
+              
             else
               echo "  --> INVALID/NOT_FOUND: No custom release notes section found for '$app_name' within the scope."
             fi
