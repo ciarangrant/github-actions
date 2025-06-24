@@ -3,7 +3,7 @@
 # extract_section.sh
 # Extracts text between a start marker and an optional end marker (exact string match).
 #
-# Usage: extract_section.sh <text_to_search_file> <start_marker> [end_marker]ss
+# Usage: extract_section.sh <text_to_search_file> <start_marker> [end_marker]
 #
 # If end_marker is provided, extraction stops at the line matching it.
 # If not provided, extraction goes to the end of the file.
@@ -25,7 +25,7 @@ echo "C"
 echo "$END_MARKER"
 
 # --- Input Validation ---
-if [ -z "$PR_BODY" ] || [ ! -f "$PR_BODY" ] || [ -z "$START_MARKER" ]; then
+if [ -z "$PR_BODY" ] || [ -z "$START_MARKER" ]; then
   echo "Usage: $0 <text_to_search> <start_marker> [end_marker]" >&2
   exit 1
 fi
