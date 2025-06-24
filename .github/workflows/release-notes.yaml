@@ -24,7 +24,7 @@ jobs:
           echo "-------------"
           
           # Define the marker you're looking for
-          MARKER="## Release Notes"
+          MARKER=" ## Release Notes"
           EXTRACTED_CONTENT=$(echo -e "$PR_BODY" | awk -v marker="$MARKER" 'f{print}; $0 == marker{f=1}')
           # If nothing was extracted (e.g., the marker wasn't found, or no content after), default to empty.
           if [ -z "$EXTRACTED_CONTENT" ]; then
