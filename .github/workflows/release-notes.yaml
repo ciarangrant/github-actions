@@ -54,7 +54,10 @@ jobs:
           # Optional: If you need to remove initial blank lines from the extracted notes
           # and then also trim trailing blank lines (often desirable for clean output)
           FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-
+          #  check if the release notes are effectively blank eg only contain blank lines
+          if [ -z "$(echo "$FULL_RELEASE_NOTES" | xargs)" ]; then
+            FULL_RELEASE_NOTES=""
+          fi  
           echo "_________________"
           echo "$FULL_RELEASE_NOTES"
           echo "_________________"
