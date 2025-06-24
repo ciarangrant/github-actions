@@ -32,10 +32,8 @@ while IFS= read -r line; do
   fi
 
   if [ "$found_marker" = true ]; then
-    echo "AAAAAA"
     if [[ "$trimmed_line" =~ ^"$END_MARKER"(.*)$ ]]; then
       # Found the start of an app-specific section, so stop collecting default notes.
-      echo "FOUND IT"
       break # Exit the while loop
     fi
     # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
