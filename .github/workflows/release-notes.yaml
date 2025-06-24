@@ -47,27 +47,40 @@ jobs:
           
           echo "Extracted Content (Full):"
           echo "$FULL_RELEASE_NOTES"
+          # Set the full extracted content as a step output
+          echo "full_release_notes_content<<EOF_FULL" >> $GITHUB_OUTPUT
+          echo "$FULL_RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF_FULL" >> $GITHUB_OUTPUT
+          # Also set the full extracted content as an env var
+          echo "FULL_RELEASE_NOTES_ENV<<EOT_FULL" >> $GITHUB_ENV
+          echo "$FULL_RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOT_FULL" >> $GITHUB_ENV
+    
           echo "Extracted Content (Default):"
           echo "$DEFAULT_RELEASE_NOTES"
-
-          # Set the extracted content as a step output
-          echo "release_notes_content<<EOF" >> $GITHUB_OUTPUT
+          # Set the default extracted content as a step output
+          echo "default_release_notes_content<<EOF" >> $GITHUB_OUTPUT
           echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
-          # Also set the extracted content as an env var
+          # Also set the default extracted content as an env var
           echo "DEFAULT_RELEASE_NOTES<<EOT" >> $GITHUB_ENV 
           echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_ENV     
           echo "EOT" >> $GITHUB_ENV
 
       - name: Display Extracted Notes (from step output)
         run: |
-          echo "--- Final Release Notes from Output (Line by Line Method) ---"
-          echo "${{ steps.extract_notes.outputs.release_notes_content }}"
+          echo "--- Full Release Notes from Output (Line by Line Method) ---"
+          echo "${{ steps.extract_notes.outputs.full_release_notes_content }}"
+          echo "--- Default Release Notes from Output (Line by Line Method) ---"
+          echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"
 
       - name: Get custom Release Notes
         run: |
-          echo "${{ steps.extract_notes.outputs.release_notes_content }}"\
+          echo "${{ steps.extract_notes.outputs.full_release_notes_content }}"\
+          echo "-------"
+          echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"\
+          echo "----------------"
+          echo "${{ env.FULL_RELEASE_NOTES }}"
           echo "-------"
           echo "${{ env.DEFAULT_RELEASE_NOTES }}"
           CUSTOM_APPS="app2 app3"
