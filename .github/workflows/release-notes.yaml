@@ -70,7 +70,9 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
           # Also set the extracted content as an env var
-          echo "FINAL_OUTPUT=$FINAL_OUTPUT" >> $GITHUB_ENV
+          echo "FINAL_OUTPUT_ENV<<EOT" >> $GITHUB_ENV
+          echo "$FINAL_OUTPUT" >> $GITHUB_ENV
+          echo "EOT" >> $GITHUB_ENV
 
       - name: Display Extracted Notes (from step output)
         run: |
