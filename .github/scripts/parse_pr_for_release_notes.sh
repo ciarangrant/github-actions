@@ -14,6 +14,7 @@
 
 # Parameters
 PR_BODY=$(cat -)
+echo $PR_BODY
 START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
