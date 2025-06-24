@@ -59,8 +59,9 @@ jobs:
 
           # Check if notes were found at all
           if [ -z "$FULL_RELEASE_NOTES" ]; then
-            echo "::warning::No content found after '## Release Notes' or marker not present, or only blank lines."
+            echo "ERROR: No content found after '## Release Notes', '## Release Notes' not present, or only blank lines."
             FINAL_OUTPUT="" # Ensure it's an empty string if nothing valid was found
+            exit 1
           else
             FINAL_OUTPUT="$FULL_RELEASE_NOTES"
           fi
