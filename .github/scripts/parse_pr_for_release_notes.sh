@@ -16,9 +16,12 @@
 PR_BODY=$(cat -)
 START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
 END_MARKER="$2"   # Optional: Renamed to avoid conflict
-echo "A"
-echo "$END_MARKER"
-echo "B"
+if [ -z "$START_MARKER" ]; then
+  echo "Usage: echo \"<text_to_search>\" | $0 <start_marker> [end_marker]" >&2
+  echo "ERROR: START_MARKER argument is missing." >&2
+  exit 1
+fi
+
 FULL_RELEASE_NOTES=""
 found_marker=false    
 
