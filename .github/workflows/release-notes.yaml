@@ -73,4 +73,9 @@ jobs:
         run: |
           echo "--- Final Release Notes from Output (Line by Line Method) ---"
           echo "${{ steps.extract_notes.outputs.release_notes_content }}"
+
+      - name: Get custom Release Notes
+        run: |
+          echo "${{ steps.extract_notes.outputs.release_notes_content }}"
+          echo "$FINAL_OUTPUT"
           
