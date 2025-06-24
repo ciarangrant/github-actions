@@ -25,18 +25,30 @@ jobs:
         id: extract_notes
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
+
+          # get the full release note section i.e. default and any custom notes
+          START_MARKER="## release notes" # ignoring case in the string to match
+          END_MARKER=""
+          FULL_RELEASE_NOTES=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
+          if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
+            echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required. (FULL_RELEASE_NOTES)"
+            echo "FULL_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
+            exit 1 # Fail the step
+          fi
+
+          # get the default release note section i.e. minus any custom notes
           START_MARKER="## release notes" # ignoring case in the string to match
           END_MARKER="### release notes for"
-
           DEFAULT_RELEASE_NOTES=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
-          
           if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
-            echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required."
+            echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required. (DEFAULT_RELEASE_NOTES)"
             echo "DEFAULT_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
           
-          echo "Extracted Content:"
+          echo "Extracted Content (Full):"
+          echo "$FULL_RELEASE_NOTES"
+          echo "Extracted Content (Default):"
           echo "$DEFAULT_RELEASE_NOTES"
 
           # Set the extracted content as a step output
