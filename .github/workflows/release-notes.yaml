@@ -1,0 +1,28 @@
+name: Get PR Body
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  log_pr_body:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Output Pull Request Body
+        id: output_pr_body 
+        run: |
+          echo "--- Pull Request Body ---"
+          echo "${{ github.event.pull_request.body }}"
+          echo "-----------------------"
+
+          echo "pr_body_output<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Access PR Body from step output (example)
+        run: |
+          echo "The PR body from step output is:"
+          echo "${{ steps.output_pr_body.outputs.pr_body_output }}"
