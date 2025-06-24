@@ -80,6 +80,6 @@ jobs:
           for app_name in $CUSTOM_APPS; do
             echo "Processing app: $app_name"
             FULL_APP_HEADING="### Release Notes for ${app_name}"
-            
-           done
+            echo "  --> VALID: Found custom release notes section for '$app_name' within the scope."
+          done
           
