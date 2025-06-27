@@ -29,6 +29,15 @@ else
   exit 1
 fi
 
+while IFS= read -r line; do
+    trimmed_line_for_check=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//') # Trimmed for comparison
+    # Check if we hit the next level 2 heading, which signifies the end of this section
+    if [[ "$trimmed_line_for_check" =~ ^## ]]; then
+      echo "DEBUG (set_release_update_type.sh): Found next level 2 heading: '$line', stopping body extraction." >&2
+      break # Stop collecting body content
+    fi
+done <<< "$RELEASE_NOTES"
+
 echo "$UPDATE_TYPE" 
 exit 0
         
