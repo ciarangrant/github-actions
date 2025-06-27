@@ -33,6 +33,10 @@ fi
 VALID_CONTENT="false"
 while IFS= read -r line; do
   trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
+  if [ -n "$trimmed_line_for_check" ]; then
+    echo "LINE IS NOT BLANK"
+    echo "$trimmed_line_for_check"
+  fi
 done
 if [ "$VALID_CONTENT" = "false" ]; then
   echo "Release Note doesnt contain valid information"
