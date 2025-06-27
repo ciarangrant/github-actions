@@ -32,7 +32,7 @@ fi
 # new check to ensure release note isnt just the [Unreleased] line
 VALID_CONTENT="false"
 while IFS= read -r line; do
-  echo "OK" >&2
+  trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
 done
 if [ "$VALID_CONTENT" = "false" ]; then
   echo "Release Note doesnt contain valid information"
