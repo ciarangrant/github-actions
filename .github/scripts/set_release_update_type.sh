@@ -33,18 +33,14 @@ fi
 VALID_CONTENT="false"
 echo "AAAAAAAAA" >&2
 while IFS= read -r line; do
-    echo "BBBBBBBB" >&2
     trimmed_line_for_check=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//') # Trimmed for comparison
-    echo "CCCCCCCC" >&2
     # Check if we hit the next level 2 heading, which signifies the end of this section
     if [ -n "$trimmed_line_for_check" ]; then
       #if ! [[ "$trimmed_line_for_check" =~ ^## ]]; then
-        echo "DDDDDDDD" >&2
         echo "DEBUG (set_release_update_type.sh): Found valid content: '$line', stopping body extraction." >&2
         VALID_CONTENT="true"
         break # Stop collecting body content
       #else
-        echo "EEEEEEEE" >&2
       #fi
     fi  
 done <<< "$RELEASE_NOTES"
