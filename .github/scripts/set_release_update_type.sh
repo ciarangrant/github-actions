@@ -34,7 +34,6 @@ VALID_CONTENT="false"
 echo "AAAAAAAAA" >&2
 while IFS= read -r line; do
     echo "OK" >&2
-
 done <<< "$RELEASE_NOTES"
 
 if [ "$VALID_CONTENT" = "false" ]; then
