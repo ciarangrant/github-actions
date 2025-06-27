@@ -15,11 +15,10 @@ jobs:
       - name: Checkout code (optional)
         uses: actions/checkout@v4
 
-      - name: Make script executable
+      - name: Make Scripts Executable
         run: |
-          pwd
-          ls -ltra
           chmod +x ./.github/scripts/parse_pr_for_release_notes.sh
+          chmod +x ./.github/scripts/set_release_update_type.sh
 
       - name: Extract Release Notes Content Line by Line
         id: extract_notes
@@ -34,9 +33,6 @@ jobs:
             #echo "FULL_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
-          #echo "AAAAAAAAAAAAA"
-          #echo "$FULL_RELEASE_NOTES"
-          #echo "AAAAAAAAAAAAA"
           
           # get the default release note section i.e. minus any custom notes
           START_MARKER="## release notes" # ignoring case in the string to match
@@ -47,12 +43,7 @@ jobs:
             #echo "DEFAULT_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
-          #echo "BBBBBBBBBBBB"
-          #echo "$DEFAULT_RELEASE_NOTES"
-          #echo "BBBBBBBBBBBB"
-          
-          #echo "Extracted Content (Full):"
-          #echo "$FULL_RELEASE_NOTES"
+
           # Set the full extracted content as a step output
           echo "full_release_notes_content<<EOF_FULL" >> $GITHUB_OUTPUT
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_OUTPUT
@@ -61,9 +52,7 @@ jobs:
           echo "FULL_RELEASE_NOTES<<EOT_FULL" >> $GITHUB_ENV
           echo "$FULL_RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOT_FULL" >> $GITHUB_ENV
-    
-          #echo "Extracted Content (Default):"
-          #echo "$DEFAULT_RELEASE_NOTES"
+
           # Set the default extracted content as a step output
           echo "default_release_notes_content<<EOF" >> $GITHUB_OUTPUT
           echo "$DEFAULT_RELEASE_NOTES" >> $GITHUB_OUTPUT
@@ -80,14 +69,15 @@ jobs:
           #echo "--- Default Release Notes from Output (Line by Line Method) ---"
           #echo "${{ steps.extract_notes.outputs.default_release_notes_content }}"
 
-      - name: Get custom Release Notes
+      - name: Get Custom Release Notes
         run: |
-          CUSTOM_APPS="app2 app3"
+          CUSTOM_APPS="app2"
+          #WONT NEED THIS LOOP IN REAL LIFE - WILL USE THE ACTUAL LOOPS IN publish.yaml
           for app_name in $CUSTOM_APPS; do
+            CUSTOM_RELEASE_NOTES=""
             echo "Processing app: $app_name"
             FULL_APP_HEADING="### release notes for ${app_name}"
             if echo "${{ env.FULL_RELEASE_NOTES }}" | grep -qFi "$FULL_APP_HEADING"; then
-              #echo "  --> VALID: Found custom release notes section for '$app_name'"
               # get the custom release note section i.e. default and any custom notes
               START_MARKER="$FULL_APP_HEADING" # ignoring case in the string to match
               END_MARKER="### release notes for"
@@ -99,7 +89,17 @@ jobs:
                 exit 1 # Fail the step
               fi
             else
-              echo "  --> INVALID/NOT_FOUND: No custom release notes section found for '$app_name'"
+              echo "ERROR: No custom release notes section found for '$app_name'"
+              exit 1 # Fail the step
             fi
           done
+          RELEASE_NOTES_TO_USE=""
+          if [ -z "$CUSTOM_RELEASE_NOTES" ]; then
+            RELEASE_NOTES_TO_USE="$DEFAULT_RELEASE_NOTES"
+          else
+            RELEASE_NOTES_TO_USE="$CUSTOM_RELEASE_NOTES"
+          fi
+          UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh)
+          echo "$UPDATE_TYPE"
+          
           
