@@ -32,9 +32,6 @@ fi
 # new check to ensure release note isnt just the [Unreleased] line
 VALID_CONTENT="false"
 echo "AAAAAAAAA" >&2
-while IFS= read -r line; do
-    echo "OK" >&2
-done <<< "$RELEASE_NOTES"
 
 if [ "$VALID_CONTENT" = "false" ]; then
   echo "VALID_CONTENT is exactly 'false'."
