@@ -9,7 +9,7 @@
 # Exits with 0 if a valid update type is found, otherwise exits with 1
 
 RELEASE_NOTES=$(cat -)
-UNRELEASED_CHANGES=$(echo "$RELEASE_NOTES" | grep "^## \[Unreleased\]")
+UNRELEASED_CHANGES=$(echo "$RELEASE_NOTES" | grep -m 1 "^## \[Unreleased\]")
 
 if [ -z "$UNRELEASED_CHANGES" ] # If UNRELEASED_CHANGES is empty
 then
