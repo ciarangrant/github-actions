@@ -31,7 +31,9 @@ fi
 
 # new check to ensure release note isnt just the [Unreleased] line
 VALID_CONTENT="false"
-echo "AAAAAAAAA" >&2
+if [ "$VALID_CONTENT" = "false"]; then
+  echo "Release Note doesnt contain valid information"
+fi
 
 # all good
 echo "$UPDATE_TYPE" 
