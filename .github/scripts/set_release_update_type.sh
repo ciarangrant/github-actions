@@ -38,7 +38,7 @@ while IFS= read -r line; do
 done <<< "$RELEASE_NOTES"
 
 if [ "$VALID_CONTENT" = "false" ]; then
-  exit 1
+  exit 1
 fi
 
 # all good
