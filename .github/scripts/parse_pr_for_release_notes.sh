@@ -27,7 +27,7 @@ if [ -n "$END_MARKER" ]; then
   END_MARKER_PATTERN=$(echo "$ESCAPED_END_MARKER" | tr '[:upper:]' '[:lower:]')
 fi
 
-FULL_RELEASE_NOTES=""
+RELEASE_NOTES=""
 found_marker=false    
 
 # Read TEXT_TO_PARSE line by line using process substitution and while loop
@@ -49,30 +49,30 @@ while IFS= read -r line; do
         break # Exit the while loop if end marker is found
       fi
     fi
-    # Append the current (original, untrimmed) line to FULL_RELEASE_NOTES
+    # Append the current (original, untrimmed) line to RELEASE_NOTES
     # Use the original 'line' variable here to keep all original whitespace as required
-    if [ -z "$FULL_RELEASE_NOTES" ]; then
-      FULL_RELEASE_NOTES="$line" 
+    if [ -z "$RELEASE_NOTES" ]; then
+      RELEASE_NOTES="$line" 
     else
-      FULL_RELEASE_NOTES="$FULL_RELEASE_NOTES"$'\n'"$line" # Subsequent lines
+      RELEASE_NOTES="$RELEASE_NOTES"$'\n'"$line" # Subsequent lines
     fi
   fi
 done <<< "$TEXT_TO_PARSE" 
 
 # Trim preceding and trailing blank lines
-FULL_RELEASE_NOTES=$(echo "$FULL_RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+RELEASE_NOTES=$(echo "$RELEASE_NOTES" | sed -e '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
 # Check if the release notes are effectively blank eg only contain blank lines
-if ! echo "$FULL_RELEASE_NOTES" | grep -qE '[^[:space:]]'; then
-  FULL_RELEASE_NOTES=""
+if ! echo "$RELEASE_NOTES" | grep -qE '[^[:space:]]'; then
+  RELEASE_NOTES=""
 fi  
 
 # Check if notes were found at all
-if [ -z "$FULL_RELEASE_NOTES" ]; then
+if [ -z "$RELEASE_NOTES" ]; then
   echo "ERROR: No content found after '## Release Notes', '## Release Notes' not present, or only blank lines."
   FINAL_OUTPUT="" # Ensure it's an empty string if nothing valid was found
   exit 1
 else
-  FINAL_OUTPUT="$FULL_RELEASE_NOTES"
+  FINAL_OUTPUT="$RELEASE_NOTES"
   # Otherwise, output the cleaned content
   echo "$FINAL_OUTPUT" 
   exit 0
