@@ -17,10 +17,10 @@ UNRELEASED_CHANGES=$(echo "$RELEASE_NOTES" | grep "^## \[Unreleased\]")
 
 if [ -z "$UNRELEASED_CHANGES" ] # If UNRELEASED_CHANGES is empty
 then
-  echo "$RELEASE_NOTES doesn't contain unreleased changes" >&2
+  echo "Release Note doesn't contain unreleased changes" >&2
   exit 1
 else
-  echo "$RELEASE_NOTES contains unreleased changes: $UNRELEASED_CHANGES" >&2
+  echo "Release Note contains unreleased changes: $UNRELEASED_CHANGES" >&2
 fi
 
 UPDATE_TYPE_REGEX='^## \[Unreleased\] - (MAJOR|MINOR|PATCH)' # Capture MAJOR|MINOR|PATCH in group 1
