@@ -93,6 +93,7 @@ jobs:
               exit 1 # Fail the step
             fi
           done
+          echo "CALLING THE NEW SCRIPT"
           RELEASE_NOTES_TO_USE=""
           if [ -z "$CUSTOM_RELEASE_NOTES" ]; then
             RELEASE_NOTES_TO_USE="$DEFAULT_RELEASE_NOTES"
