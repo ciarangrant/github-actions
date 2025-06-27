@@ -33,13 +33,11 @@ fi
 VALID_CONTENT="false"
 echo "AAAAAAAAA" >&2
 while IFS= read -r line; do
-    echo "OK"
+    echo "OK" >&2
 
 done <<< "$RELEASE_NOTES"
 
-echo "HELLO"
 if [ "$VALID_CONTENT" = "false" ]; then
-  echo "Release Note doesnt contain valid information"
   exit 1
 fi
 
