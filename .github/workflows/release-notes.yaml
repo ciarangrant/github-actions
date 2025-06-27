@@ -93,14 +93,13 @@ jobs:
               exit 1 # Fail the step
             fi
           done
-          echo "CALLING THE NEW SCRIPT"
           RELEASE_NOTES_TO_USE=""
           if [ -z "$CUSTOM_RELEASE_NOTES" ]; then
             RELEASE_NOTES_TO_USE="$DEFAULT_RELEASE_NOTES"
           else
             RELEASE_NOTES_TO_USE="$CUSTOM_RELEASE_NOTES"
           fi
-          UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh)
+          UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh) >&2
           echo "$UPDATE_TYPE"
           
           
