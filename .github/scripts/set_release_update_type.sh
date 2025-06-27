@@ -31,13 +31,19 @@ fi
 
 # new check to ensure release note isnt just the [Unreleased] line
 VALID_CONTENT="false"
+echo "AAAAAAAAA"
 while IFS= read -r line; do
+    echo "BBBBBBBB"
     trimmed_line_for_check=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//') # Trimmed for comparison
+    echo "CCCCCCCC"
     # Check if we hit the next level 2 heading, which signifies the end of this section
     if ! [[ "$trimmed_line_for_check" =~ ^## ]]; then
+      echo "DDDDDDDD"
       echo "DEBUG (set_release_update_type.sh): Found valid content: '$line', stopping body extraction." >&2
       VALID_CONTENT="true"
       break # Stop collecting body content
+    else
+      echo "EEEEEEEE"
     fi
 done <<< "$RELEASE_NOTES"
 
