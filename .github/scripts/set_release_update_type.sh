@@ -35,9 +35,9 @@ while IFS= read -r line; do
   echo "$line" >&2
   trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
   echo "-------" >&2
-  echo "$trimmed_line_for_check" >&2
+  echo "$trimmed_line" >&2
   echo "-------" >&2
-  if [ -n "$trimmed_line_for_check" ]; then
+  if [ -n "$trimmed_line" ]; then
     echo "LINE IS NOT BLANK" >&2
   fi
 done <<< "$RELEASE_NOTES"
