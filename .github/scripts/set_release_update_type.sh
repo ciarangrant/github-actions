@@ -33,13 +33,6 @@ fi
 VALID_CONTENT="false"
 echo "AAAAAAAAA" >&2
 
-if [ "$VALID_CONTENT" = "false" ]; then
-  echo "VALID_CONTENT is exactly 'false'."
-  exit 1
-else
-  echo "VALID_CONTENT is not 'false' (it's '$VALID_CONTENT')."
-fi
-
 # all good
 echo "$UPDATE_TYPE" 
 exit 0
