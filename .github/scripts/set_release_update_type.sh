@@ -34,7 +34,7 @@ VALID_CONTENT="false"
 while IFS= read -r line; do
   trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
   if [ -n "$trimmed_line" ]; then
-    if ! [[ "$trimmed_line_for_check" =~ ^## ]]; then
+    if ! [[ "$trimmed_line" =~ ^## ]]; then
       VALID_CONTENT="true"
       break
     fi  
