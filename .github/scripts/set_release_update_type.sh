@@ -38,6 +38,7 @@ while IFS= read -r line; do
 done <<< "$RELEASE_NOTES"
 
 if [ "$VALID_CONTENT" = "false" ]; then
+  echo "Release Note doesnt contain valid information"
   exit 1
 fi
 
