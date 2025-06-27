@@ -8,7 +8,6 @@
 # Outputs the extracted content to stdout.
 # Exits with 0 if a valid update type is found, otherwise exits with 1
 
-# Parameters
 RELEASE_NOTES=$(cat -)
 echo "$RELEASE_NOTES"
 
