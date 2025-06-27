@@ -9,10 +9,6 @@
 # Exits with 0 if a valid update type is found, otherwise exits with 1
 
 RELEASE_NOTES=$(cat -)
-echo "------------------" >&2
-echo "$RELEASE_NOTES" >&2
-echo "------------------" >&2
-#UNRELEASED_CHANGES=$(grep "^## \[Unreleased\]" $RELEASE_NOTES)
 UNRELEASED_CHANGES=$(echo "$RELEASE_NOTES" | grep "^## \[Unreleased\]")
 
 if [ -z "$UNRELEASED_CHANGES" ] # If UNRELEASED_CHANGES is empty
@@ -32,7 +28,7 @@ else
   echo "$RELEASE_NOTES doesn't contain update type" >&2
   exit 1
 fi
-#"UPDATE_TYPE=$UPDATE_TYPE"
+
 echo "$UPDATE_TYPE" 
 exit 0
         
