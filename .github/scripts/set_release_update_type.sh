@@ -32,6 +32,7 @@ fi
 # new check to ensure release note isnt just the [Unreleased] line
 VALID_CONTENT="false"
 while IFS= read -r line; do
+  echo "$line"
   trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r$//')
   if [ -n "$trimmed_line_for_check" ]; then
     echo "LINE IS NOT BLANK"
