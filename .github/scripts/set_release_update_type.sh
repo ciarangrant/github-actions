@@ -38,7 +38,7 @@ while IFS= read -r line; do
     echo "LINE IS NOT BLANK"
     echo "$trimmed_line_for_check"
   fi
-done
+done <<< "$RELEASE_NOTES"
 if [ "$VALID_CONTENT" = "false" ]; then
   echo "Release Note doesnt contain valid information"
 fi
