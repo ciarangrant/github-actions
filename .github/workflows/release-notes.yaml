@@ -12,7 +12,7 @@ jobs:
   extract_release_notes:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code (optional)
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Make Scripts Executable
@@ -100,6 +100,9 @@ jobs:
             RELEASE_NOTES_TO_USE="$CUSTOM_RELEASE_NOTES"
           fi
           UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh) >&2
+          echo "---------------------------------------------------"
           echo "$UPDATE_TYPE"
+          echo "$RELEASE_NOTES_TO_USE"
+          echo "---------------------------------------------------"
           
           
