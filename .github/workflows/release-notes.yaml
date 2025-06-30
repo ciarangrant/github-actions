@@ -71,7 +71,7 @@ jobs:
 
       - name: Get Custom Release Notes
         run: |
-          CUSTOM_APPS="sam-app2 sam-app3"
+          CUSTOM_APPS=""
           #WONT NEED THIS LOOP IN REAL LIFE - WILL USE THE ACTUAL LOOPS IN publish.yaml
           for app_name in $CUSTOM_APPS; do
             CUSTOM_RELEASE_NOTES=""
