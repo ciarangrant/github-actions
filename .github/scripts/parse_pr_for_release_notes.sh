@@ -19,6 +19,7 @@ END_MARKER_PATTERN="" # handles if there is no END_MARKER
 
 echo "---------" >&2
 echo "$TEXT_TO_PARSE" >&2
+echo "$START_MARKER" >&2
 echo "---------" >&2
 
 if [ -n "$END_MARKER" ]; then
