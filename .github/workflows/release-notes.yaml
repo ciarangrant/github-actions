@@ -19,7 +19,7 @@ jobs:
         run: |
           chmod +x ./.github/scripts/parse_pr_for_release_notes.sh
           chmod +x ./.github/scripts/set_release_update_type.sh
-          chmod +x ./.github/test.sh
+          chmod +x ./.github/scripts/test.sh
 
       - name: Extract Release Notes Content Line by Line
         id: extract_notes
