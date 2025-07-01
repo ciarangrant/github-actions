@@ -11,6 +11,9 @@ on:
 jobs:
   extract_release_notes:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
