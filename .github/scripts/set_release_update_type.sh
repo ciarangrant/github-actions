@@ -3,7 +3,7 @@
 # set_release_update_type.sh
 # Checks the format of the release notes texts and extracts the update type from it
 #
-# Usage: set_release_update_type.sh <RELEASE_NOTES>
+# Usage: set_release_update_type.sh <release_notes>
 #
 # Outputs the extracted content to stdout.
 # Exits with 0 if a valid update type is found, otherwise exits with 1
