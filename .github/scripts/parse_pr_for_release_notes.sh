@@ -12,9 +12,12 @@
 # Outputs the extracted content to stdout.
 # Exits with 0 if content is found, otherwise exist with 1
 
-TEXT_TO_PARSE=$(cat -)
-START_MARKER="$1"
-END_MARKER="$2"   # Optional
+#TEXT_TO_PARSE=$(cat -)
+#START_MARKER="$1"
+#END_MARKER="$2"   # Optional
+TEXT_TO_PARSE="$1"
+START_MARKER="$2"
+END_MARKER="$3" 
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
 
 if [ -n "$END_MARKER" ]; then
