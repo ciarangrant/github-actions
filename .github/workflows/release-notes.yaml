@@ -95,7 +95,9 @@ jobs:
               END_MARKER="### release notes for"
               #CUSTOM_RELEASE_NOTES=$(echo "ALL_CUSTOM_RELEASE_NOTES" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
               CUSTOM_RELEASE_NOTES=$(./.github/scripts/parse_pr_for_release_notes.sh "$ALL_CUSTOM_RELEASE_NOTES" "$START_MARKER" "$END_MARKER")
-              echo "$CUSTOM_RELEASE_NOTES"
+              echo "CUSTOM_RELEASE_NOTES<<EOT_CUSTOM" 
+              echo "$CUSTOM_RELEASE_NOTES"  
+              echo "EOT_CUSTOM"
               if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
                 echo "ERROR: '## Release Notes' section not found or is empty/blank. Custom notes for '$app_name' are required. (CUSTOM_RELEASE_NOTES)"
                 #echo "CUSTOM_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
