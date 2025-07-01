@@ -30,15 +30,13 @@ jobs:
           START_MARKER="## release notes" # ignoring case in the string to match
           END_MARKER="XXXXXXXXXXXXXXXXXXXXXXXXX"
           #FULL_RELEASE_NOTES=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER")
-          echo "AAAAAAAAAAAA"
-          echo "$PR_BODY"
-          echo "CCCCCCCCCCCC"
           FULL_RELEASE_NOTES=$(./.github/scripts/parse_pr_for_release_notes.sh "$PR_BODY" "$START_MARKER" "$END_MARKER")
           if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
             echo "ERROR: '## Release Notes' section not found or is empty/blank. Default notes are required. (FULL_RELEASE_NOTES)"
             #echo "FULL_RELEASE_NOTES=" >> $GITHUB_OUTPUT 
             exit 1 # Fail the step
           fi
+          echo "EXITING"
           exit 0
           
           # get the default release note section i.e. minus any custom notes
