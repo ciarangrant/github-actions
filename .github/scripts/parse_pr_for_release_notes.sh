@@ -15,10 +15,6 @@
 TEXT_TO_PARSE=$(cat -)
 START_MARKER="$1"
 END_MARKER="$2"   # Optional
-
-echo "------------"
-echo "$TEXT_TO_PARSE"
-echo "------------"
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
 
 if [ -n "$END_MARKER" ]; then
