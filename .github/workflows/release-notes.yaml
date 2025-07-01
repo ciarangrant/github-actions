@@ -82,7 +82,7 @@ jobs:
 
       - name: Get Custom Release Notes
         run: |
-          CUSTOM_APPS=""
+          CUSTOM_APPS="sam-app3"
           #WONT NEED THIS LOOP IN REAL LIFE - WILL USE THE ACTUAL LOOPS IN publish.yaml
           for app_name in $CUSTOM_APPS; do
             CUSTOM_RELEASE_NOTES=""
@@ -110,9 +110,9 @@ jobs:
           done
           RELEASE_NOTES_TO_USE=""
           if [ -z "$CUSTOM_RELEASE_NOTES" ]; then
-            RELEASE_NOTES_TO_USE="$DEFAULT_RELEASE_NOTES"
+            RELEASE_NOTES_TO_USE="XXXXXXXXXXXXXXX$DEFAULT_RELEASE_NOTES"
           else
-            RELEASE_NOTES_TO_USE="$CUSTOM_RELEASE_NOTES"
+            RELEASE_NOTES_TO_USE="ZZZZZZZZZZZZZZZ$CUSTOM_RELEASE_NOTES"
           fi
           UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh) >&2
           echo "---------------------------------------------------"
