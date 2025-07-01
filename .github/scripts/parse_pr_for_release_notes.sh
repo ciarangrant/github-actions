@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # parse_pr_for_release_notes.sh
 # Extracts text between a start marker and an optional end marker (exact string match).
@@ -16,10 +16,6 @@ TEXT_TO_PARSE=$(cat -)
 START_MARKER="$1"
 END_MARKER="$2"
 END_MARKER_PATTERN="" # handles if there is no END_MARKER
-
-echo "---------" >&2
-echo "$TEXT_TO_PARSE" >&2
-echo "---------" >&2
 
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
