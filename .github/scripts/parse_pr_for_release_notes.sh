@@ -15,9 +15,9 @@
 #TEXT_TO_PARSE=$(cat -)
 #START_MARKER="$1"
 #END_MARKER="$2"   # Optional
-TEXT_TO_PARSE="$1"
-START_MARKER="$2"
-END_MARKER="$3" 
+#TEXT_TO_PARSE="$1"
+START_MARKER="$1"
+END_MARKER="$2" 
 END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
 
 if [ -n "$END_MARKER" ]; then
