@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # parse_pr_for_release_notes.sh
 # Extracts text between a start marker and an optional end marker (exact string match).
