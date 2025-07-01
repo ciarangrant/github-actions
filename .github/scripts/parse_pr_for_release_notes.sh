@@ -12,13 +12,10 @@
 # Outputs the extracted content to stdout.
 # Exits with 0 if content is found, otherwise exist with 1
 
-#TEXT_TO_PARSE=$(cat -)
-#START_MARKER="$1"
-#END_MARKER="$2"   # Optional
-#TEXT_TO_PARSE="$1"
+TEXT_TO_PARSE=$(cat -)
 START_MARKER="$1"
-END_MARKER="$2" 
-END_MARKER_PATTERN="" # Initialize END_MARKER_PATTERN to be empty by default
+END_MARKER="$2"
+END_MARKER_PATTERN="" # handles if there is no END_MARKER
 
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
