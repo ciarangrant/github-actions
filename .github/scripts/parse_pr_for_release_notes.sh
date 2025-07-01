@@ -21,11 +21,6 @@ TEXT_TO_PARSE="$1"
 START_MARKER="$2"
 END_MARKER="$3"
 
-echo "---------" >&2
-echo "$TEXT_TO_PARSE" >&2
-echo "$START_MARKER" >&2
-echo "---------" >&2
-
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
   # This makes sure symbols like # . * + ? ( ) etc. are treated literally, not as regex.
