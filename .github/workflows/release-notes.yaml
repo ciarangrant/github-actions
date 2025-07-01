@@ -113,7 +113,7 @@ jobs:
             echo "Using Custom Release Notes"
             RELEASE_NOTES_TO_USE="$CUSTOM_RELEASE_NOTES"
           fi
-          UPDATE_TYPE=$(echo "$RELEASE_NOTES_TO_USE" | ./.github/scripts/set_release_update_type.sh) >&2
+          UPDATE_TYPE=$(./.github/scripts/set_release_update_type.sh "$RELEASE_NOTES_TO_USE") >&2
           echo "---------------------------------------------------"
           echo "$UPDATE_TYPE"
           echo "$RELEASE_NOTES_TO_USE"
