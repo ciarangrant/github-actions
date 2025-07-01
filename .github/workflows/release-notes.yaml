@@ -23,7 +23,7 @@ jobs:
 
       - name: Test script
         run: |
-          PR_BODY="${{ github.event.pull_request.body }}
+          PR_BODY="${{ github.event.pull_request.body }}"
           ME=$(./.github/scripts/test.sh)
           if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
             echo "ERROR: testing not good"
