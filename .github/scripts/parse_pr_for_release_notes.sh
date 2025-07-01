@@ -3,7 +3,7 @@
 # parse_pr_for_release_notes.sh
 # Extracts text between a start marker and an optional end marker (exact string match).
 #
-# Usage: parse_pr_for_release_notes.sh <start_marker> [end_marker]
+# Usage: parse_pr_for_release_notes.sh <text_to_parse> <start_marker> [end_marker]
 #
 # If end_marker is provided, extraction stops at the line matching it.
 # If not provided, extraction goes to the end of the file.
@@ -15,11 +15,11 @@
 #TEXT_TO_PARSE=$(cat -)
 #START_MARKER="$1"
 #END_MARKER="$2"
-END_MARKER_PATTERN="" # handles if there is no END_MARKER
 
 TEXT_TO_PARSE="$1"
 START_MARKER="$2"
 END_MARKER="$3"
+END_MARKER_PATTERN="" # handles if there is no END_MARKER
 
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
