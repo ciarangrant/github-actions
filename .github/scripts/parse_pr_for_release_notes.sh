@@ -12,13 +12,10 @@
 # Outputs the extracted content to stdout.
 # Exits with 0 if content is found, otherwise exist with 1
 
-#TEXT_TO_PARSE=$(cat -)
-#START_MARKER="$1" # Renamed to avoid conflict with internal Bash var
-#END_MARKER="$2"   # Optional: Renamed to avoid conflict
-
-#TEXT_TO_PARSE="$1"
+TEXT_TO_PARSE=$(cat -)
 START_MARKER="$1"
-END_MARKER="$2"
+END_MARKER="$2"   # Optional
+
 echo "------------"
 echo "$TEXT_TO_PARSE"
 echo "------------"
