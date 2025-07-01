@@ -25,6 +25,7 @@ jobs:
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
           PR_BODY="THIS IS just some TEXT"
+          pwd
     
           # get the full release note section i.e. default and any custom notes
           START_MARKER="## release notes" # ignoring case in the string to match
