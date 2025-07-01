@@ -10,10 +10,6 @@
 
 #RELEASE_NOTES=$(cat -)
 RELEASE_NOTES=$1
-echo "+++++++++++" >&2
-echo "$RELEASE_NOTES" >&2
-echo "+++++++++++" >&2
-
 
 UNRELEASED_CHANGES=$(echo "$RELEASE_NOTES" | grep -m 1 "^## \[Unreleased\]") >&2
 
