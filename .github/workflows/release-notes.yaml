@@ -25,7 +25,7 @@ jobs:
         run: |
           ME=$(./.github/scripts/test.sh)
           if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
-            echo "ERROR: 'testing not good"
+            echo "ERROR: testing not good"
             exit 1 # Fail the step
           fi  
 
