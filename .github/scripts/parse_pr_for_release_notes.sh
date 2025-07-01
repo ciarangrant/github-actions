@@ -17,6 +17,10 @@ START_MARKER="$1"
 END_MARKER="$2"
 END_MARKER_PATTERN="" # handles if there is no END_MARKER
 
+echo "---------" >&2
+echo "$TEXT_TO_PARSE" >&2
+echo "---------" >&2
+
 if [ -n "$END_MARKER" ]; then
   # Escape potential regex special characters in the raw end marker for safety.
   # This makes sure symbols like # . * + ? ( ) etc. are treated literally, not as regex.
