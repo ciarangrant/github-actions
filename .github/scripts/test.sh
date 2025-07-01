@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo "hello world"
+echo "hello world" >&2
+exit 0
