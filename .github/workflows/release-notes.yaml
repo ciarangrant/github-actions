@@ -88,12 +88,13 @@ jobs:
             CUSTOM_RELEASE_NOTES=""
             echo "Processing app: $app_name"
             FULL_APP_HEADING="### release notes for ${app_name}"
-            if echo "${{ env.FULL_RELEASE_NOTES }}" | grep -qFi "$FULL_APP_HEADING"; then
+            ALL_CUSTOM_RELEASE_NOTES="${{ env.FULL_RELEASE_NOTES }}"
+            if echo "$ALL_CUSTOM_RELEASE_NOTES" | grep -qFi "$FULL_APP_HEADING"; then
               # get the custom release note section i.e. default and any custom notes
               START_MARKER="$FULL_APP_HEADING" # ignoring case in the string to match
               END_MARKER="### release notes for"
-              #CUSTOM_RELEASE_NOTES=$(echo "${{ env.FULL_RELEASE_NOTES }}" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
-              CUSTOM_RELEASE_NOTES=$(./.github/scripts/parse_pr_for_release_notes.sh "${{ env.FULL_RELEASE_NOTES }}" "$START_MARKER" "$END_MARKER")
+              #CUSTOM_RELEASE_NOTES=$(echo "ALL_CUSTOM_RELEASE_NOTES" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER" "$END_MARKER")
+              CUSTOM_RELEASE_NOTES=$(./.github/scripts/parse_pr_for_release_notes.sh "$ALL_CUSTOM_RELEASE_NOTES" "$START_MARKER" "$END_MARKER")
               echo "$CUSTOM_RELEASE_NOTES"
               if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
                 echo "ERROR: '## Release Notes' section not found or is empty/blank. Custom notes for '$app_name' are required. (CUSTOM_RELEASE_NOTES)"
