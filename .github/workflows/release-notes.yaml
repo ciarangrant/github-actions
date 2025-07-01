@@ -22,15 +22,6 @@ jobs:
         run: |
           chmod +x ./.github/scripts/parse_pr_for_release_notes.sh
           chmod +x ./.github/scripts/set_release_update_type.sh
-          chmod +x ./.github/scripts/test.sh
-
-      - name: Test script
-        run: |
-          ME=$(./.github/scripts/test.sh)
-          if [ $? -ne 0 ]; then # Check script's exit status (0 for success, 1 for error/blank)
-            echo "ERROR: testing not good"
-            exit 1 # Fail the step
-          fi  
 
       - name: Extract Release Notes Content Line by Line
         id: extract_notes
