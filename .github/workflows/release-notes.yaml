@@ -78,6 +78,7 @@ jobs:
         run: |
           CUSTOM_APPS="sam-app3"
           #WONT NEED THIS LOOP IN REAL LIFE - WILL USE THE ACTUAL LOOPS IN publish.yaml
+          #loop used in changelog check script is below
           for app_name in $CUSTOM_APPS; do
             CUSTOM_RELEASE_NOTES=""
             echo "Processing app: $app_name"
@@ -99,6 +100,18 @@ jobs:
               exit 1 # Fail the step
             fi
           done
+          #for item in $(git diff-tree -m --no-commit-id --name-only HEAD | sort | uniq); do
+          #  if [ -f "${item}" ]; then # test if item is a file
+          #    echo "Project root modified"
+          #    rootModified=true
+          #  elif [ "${item}" == ".github" ]; then # Considering .github, the same as projectRoot.
+          #    echo "Project root modified .github directory"
+          #    rootModified=true
+          #  else # assume returned item is a directory and add to array
+          #    echo "Project directory ${item} modified"
+          #    modifiedDirs+=("${item}")
+          #  fi
+          #done
           RELEASE_NOTES_TO_USE=""
           if [ -z "$CUSTOM_RELEASE_NOTES" ]; then
             echo "Using Default Release Notes" 
