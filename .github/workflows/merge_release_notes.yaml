@@ -29,13 +29,14 @@ jobs:
 
       - name: Print Raw Git Log
         run: |
-          LOG=$(git log)
+          LOG=$(git log --merges --pretty=format:"%s" -n 1)
           echo "$LOG"
 
       - name: Find merged PR
         id: find-pr
         run: |
           PR_NUMBER=$(git log --merges --pretty=format:"%s" -n 1 | grep -oP 'Merge pull request #\K\d+')
+          echo "$PR_NUMBER"
           echo "::set-output name=pr_number::${PR_NUMBER}"
 
       - name: Get PR Body from Push Event
