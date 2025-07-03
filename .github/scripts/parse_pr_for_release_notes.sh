@@ -59,8 +59,6 @@ while IFS= read -r line; do
     else
       RELEASE_NOTES="$RELEASE_NOTES"$'\n'"$line" # Subsequent lines
     fi
-  else
-    RELEASE_NOTES=""
   fi
 done <<< "$TEXT_TO_PARSE" 
 
@@ -73,7 +71,7 @@ fi
 
 # Check if notes were found at all
 if [ -z "$RELEASE_NOTES" ]; then
-  echo "ERROR: No content found after '## Release Notes', '## Release Notes' not present, or only blank lines."
+  echo "ERROR: No content found after '## Release Notes', '## Release Notes' not present, or only blank lines." >&2
   FINAL_OUTPUT="" # Ensure it's an empty string if nothing valid was found
   exit 1
 else
