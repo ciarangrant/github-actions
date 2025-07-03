@@ -44,6 +44,9 @@ jobs:
           echo "++++++++++++++++++++"
           echo "$PR_BODY"
           echo "++++++++++++++++++++"
+          echo "PR_BODY<<EOT_PR" >> $GITHUB_ENV
+          echo "$PR_BODY" >> $GITHUB_ENV
+          echo "EOT_PR" >> $GITHUB_ENV
           #echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
 
       - name: Use PR body
