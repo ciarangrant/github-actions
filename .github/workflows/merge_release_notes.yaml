@@ -25,6 +25,21 @@ jobs:
           echo "-------------------------------"
         shell: bash
 
+      - name: Get PR description
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const response = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            console.log(response.data.body);
+            
+      #- name: Use the description (example)
+      #  run: echo "PR Description: ${{ steps.get-description.outputs.description }}" 
+
       - name: Get PR Body from Push Event
         id: get_pr_body
         env:
