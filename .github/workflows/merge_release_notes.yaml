@@ -60,9 +60,9 @@ jobs:
               console.log('Not a merge commit from a pull request.');
             }
             
-      - name: Use the description (example)
-        if: steps.merge-check.outputs.is_merge == 'true'
-        run: echo "PR Description: ${{ steps.get-description.outputs.description }}"
+      #- name: Use the description (example)
+      #  if: steps.merge-check.outputs.is_merge == 'true'
+      #  run: echo "PR Description: ${{ steps.get-description.outputs.description }}"
         
             
       #- name: Use the description (example)
