@@ -25,48 +25,11 @@ jobs:
           echo "-------------------------------"
         shell: bash
 
-      - name: Check for merge commit
-        id: merge-check
+      - name: Find merged PR
+        id: find-pr
         run: |
-          if [[ $(git rev-parse --short HEAD) == $(git merge-base HEAD $(git merge-base HEAD origin/main)) ]]; then
-            echo "::set-output name=is_merge::false"
-          else
-            echo "::set-output name=is_merge::true"
-          fi
-
-      - name: Get PR description (if merge)
-        if: steps.merge-check.outputs.is_merge == 'true'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const headRef = context.payload.ref;
-            const headSha = context.sha;
-            const response = await github.rest.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: headSha,
-            });
-            const mergeMessage = response.data.message;
-            const prNumberMatch = mergeMessage.match(/Merge pull request #(\d+) from/);
-            if (prNumberMatch) {
-              const prNumber = prNumberMatch[1];
-              const prResponse = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-              });
-              console.log(prResponse.data.body);
-            } else {
-              console.log('Not a merge commit from a pull request.');
-            }
-            
-      #- name: Use the description (example)
-      #  if: steps.merge-check.outputs.is_merge == 'true'
-      #  run: echo "PR Description: ${{ steps.get-description.outputs.description }}"
-        
-            
-      #- name: Use the description (example)
-      #  run: echo "PR Description: ${{ steps.get-description.outputs.description }}" 
+          PR_NUMBER=$(git log --merges --pretty=format:"%s" -n 1 | grep -oP 'Merge pull request #\K\d+')
+          echo "::set-output name=pr_number::${PR_NUMBER}"
 
       - name: Get PR Body from Push Event
         id: get_pr_body
