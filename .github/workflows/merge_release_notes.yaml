@@ -34,7 +34,7 @@ jobs:
         id: extract_notes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
-          COMMITS: ${{ github.event.commits[0].message }}
+          COMMITS: ${{ github.event.commits.message }}
         run: |    
           echo "----------------------"
           echo "$COMMITS"
