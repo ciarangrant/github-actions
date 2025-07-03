@@ -9,4 +9,6 @@
 - [ ] I have tested this
 
 ## Release Notes
-## [Unreleased] - <TYPE>
+## [Unreleased] - (MAJOR|MINOR|PATCH)
+
+### End of Release Notes
