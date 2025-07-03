@@ -27,7 +27,7 @@ jobs:
 
       - name: Print Raw Git Log
         run: |
-          LOG=$(git log --merges --pretty=format:"%s" -n 1)
+          LOG=$(git log)
           echo "$LOG"
 
       - name: Find merged PR
