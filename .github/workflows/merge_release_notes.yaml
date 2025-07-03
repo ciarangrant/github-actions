@@ -18,7 +18,10 @@ jobs:
       - name: Dump Full Push Event Payload
         run: |
           echo "--- Full Push Event Payload ---"
-          echo "${{ toJSON(github.event) }}"
+          # Use a heredoc to safely print the multi-line JSON payload
+          cat <<EOF
+          ${{ toJSON(github.event) }}
+          EOF
           echo "-------------------------------"
         shell: bash
 
