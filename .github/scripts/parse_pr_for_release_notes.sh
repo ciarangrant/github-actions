@@ -59,6 +59,8 @@ while IFS= read -r line; do
     else
       RELEASE_NOTES="$RELEASE_NOTES"$'\n'"$line" # Subsequent lines
     fi
+  else
+    RELEASE_NOTES=""
   fi
 done <<< "$TEXT_TO_PARSE" 
 
