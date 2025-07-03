@@ -25,6 +25,56 @@ jobs:
           echo "-------------------------------"
         shell: bash
 
+      - name: Get PR Body from Push Event
+        id: get_pr_body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Default token for API access
+        run: |
+          # Get the full repository name (e.g., owner/repo)
+          REPO_FULL_NAME="${{ github.repository }}"
+
+          echo "Repository: $REPO_FULL_NAME"
+
+          # Extract all PR numbers from commit messages in the push event payload.
+          # Use jq to parse the JSON and capture numbers following '#'.
+          # Then sort them numerically in reverse and take the first (highest).
+          HIGHEST_PR_NUMBER=$(echo "${{ toJSON(github.event) }}" | jq -r '.commits[].message | capture("#(?<pr_number>[0-9]+)") | .pr_number' | sort -rn | head -n 1)
+
+          if [ -z "$HIGHEST_PR_NUMBER" ]; then
+            echo "No Pull Request number found in the commit messages of this push event."
+            echo "::set-output name=pr_body::" # Set empty output if no PR number found
+            exit 0 # Exit successfully as no PR was found to process
+          fi
+
+          echo "Highest PR number found in commit messages: #$HIGHEST_PR_NUMBER"
+
+          # Now, fetch the full Pull Request details using the highest found PR number
+          # This uses the GitHub CLI to make an API call to get the specific PR's details.
+          PR_INFO=$(gh api \
+            "/repos/$REPO_FULL_NAME/pulls/$HIGHEST_PR_NUMBER" \
+            --jq '{number: .number, title: .title, body: .body}' \
+            || echo "{}") # Return empty JSON object if API call fails
+
+          PR_NUMBER=$(echo "$PR_INFO" | jq -r '.number // ""')
+          PR_TITLE=$(echo "$PR_INFO" | jq -r '.title // ""')
+          PR_BODY=$(echo "$PR_INFO" | jq -r '.body // ""')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Failed to fetch PR details for #$HIGHEST_PR_NUMBER via GitHub API."
+            echo "::set-output name=pr_body::"
+          else
+            echo "Successfully retrieved details for PR #$PR_NUMBER: $PR_TITLE"
+            echo "PR Body (raw):"
+            echo "$PR_BODY"
+            echo "::set-output name=pr_body::$PR_BODY"
+          fi
+        shell: bash
+
+      - name: Use the extracted PR body
+        run: |
+          echo "The PR body is: '${{ steps.get_pr_body.outputs.pr_body }}'"
+        shell: bash  
+
       - name: Make Scripts Executable
         run: |
           chmod +x ./.github/scripts/parse_pr_for_release_notes.sh
@@ -34,7 +84,6 @@ jobs:
         id: extract_notes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
-          COMMITS: ${{ github.event.commits.message }}
         run: |    
           echo "----------------------"
           echo "$COMMITS"
