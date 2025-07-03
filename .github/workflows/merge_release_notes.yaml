@@ -25,17 +25,45 @@ jobs:
           echo "-------------------------------"
         shell: bash
 
-      - name: Get PR description
+      - name: Check for merge commit
+        id: merge-check
+        run: |
+          if [[ $(git rev-parse --short HEAD) == $(git merge-base HEAD $(git merge-base HEAD origin/main)) ]]; then
+            echo "::set-output name=is_merge::false"
+          else
+            echo "::set-output name=is_merge::true"
+          fi
+
+      - name: Get PR description (if merge)
+        if: steps.merge-check.outputs.is_merge == 'true'
         uses: actions/github-script@v6
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const response = await github.rest.pulls.get({
+            const headRef = context.payload.ref;
+            const headSha = context.sha;
+            const response = await github.rest.repos.getCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber,
+              ref: headSha,
             });
-            console.log(response.data.body);
+            const mergeMessage = response.data.message;
+            const prNumberMatch = mergeMessage.match(/Merge pull request #(\d+) from/);
+            if (prNumberMatch) {
+              const prNumber = prNumberMatch[1];
+              const prResponse = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+              console.log(prResponse.data.body);
+            } else {
+              console.log('Not a merge commit from a pull request.');
+            }
+            
+      - name: Use the description (example)
+        if: steps.merge-check.outputs.is_merge == 'true'
+        run: echo "PR Description: ${{ steps.get-description.outputs.description }}"
+        
             
       #- name: Use the description (example)
       #  run: echo "PR Description: ${{ steps.get-description.outputs.description }}" 
