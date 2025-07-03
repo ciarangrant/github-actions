@@ -25,6 +25,9 @@ jobs:
           echo "-------------------------------"
         shell: bash
 
+      - name: Print Raw Git Log
+        run: git log --merges --pretty=format:"%s" -n 1  
+
       - name: Find merged PR
         id: find-pr
         run: |
