@@ -34,7 +34,11 @@ jobs:
         id: extract_notes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
-        run: |          
+          COMMITS: ${{ github.event.commits[0].message }}
+        run: |    
+          echo "----------------------"
+          echo "$COMMITS"
+          echo "----------------------"
           # get the full release note section i.e. default and any custom notes
           START_MARKER="## release notes" # ignoring case in the string to match
           #FULL_RELEASE_NOTES=$(echo "$PR_BODY" | ./.github/scripts/parse_pr_for_release_notes.sh "$START_MARKER")
