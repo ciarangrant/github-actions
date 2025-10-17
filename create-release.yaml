@@ -1,0 +1,322 @@
+name: Create New Releases
+
+on:
+  push:
+    branches:
+      - PSREDEV-2765
+
+concurrency: 
+  group: ${{ github.workflow }} 
+  cancel-in-progress: true      
+
+jobs:
+  create-releases:
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    outputs:
+      publish_sam_deploy_pipeline_backup: ${{ steps.process-stacks.outputs.publish_sam_deploy_pipeline_backup }}
+    steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DEV_PLATFORM_RELEASE_APP_ID }}
+          private-key: ${{ secrets.DEV_PLATFORM_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      # DEPLOY_TEST_ROLE_ARN temporarily added to allow upload to dev bucket for testing new process
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.DEPLOY_TEST_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.LEAD_ENGINEER_TOKEN }}
+          fetch-depth: '0' # Needed for git diff-tree to compare
+
+      - name: If a stack directory and changelog is updated set the needed outputs
+        shell: bash
+        run: '.github/scripts/check-changelog-requirements.sh'
+
+      # Using Lead Engineer's account here (not possible to alter GITHUB_TOKEN to include write permissions- project policy)
+      - name: Setup git config
+        if: ${{ env.UPDATE_CHANGELOG }}
+        run: |
+          git config user.name "User1"
+          git config user.email "blah@blah.com"
+
+      - name: Find Merged PR Number
+        id: find-pr
+        if: ${{ env.UPDATE_CHANGELOG }}
+        run: |
+          PR_NUMBER=$(git log -1 --pretty=format:"%s" "$GITHUB_SHA")
+          PR_NUMBER=2723
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "ERROR: No PR number found. Check merge commit message $GITHUB_SHA"
+            exit 1
+          else
+            PR_NUMBER="${PR_NUMBER#Merge pull request #}"
+            PR_NUMBER="${PR_NUMBER%% from*}"
+            echo "Using PR_NUMBER $PR_NUMBER"
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          fi
+
+      - name: Get PR body using gh CLI
+        id: get-body
+        if: ${{ env.UPDATE_CHANGELOG }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          PR_BODY=$(gh api /repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} | jq -r '.body')
+          echo "PR_BODY<<EOT_PR" >> $GITHUB_ENV
+          echo "$PR_BODY" >> $GITHUB_ENV
+          echo "EOT_PR" >> $GITHUB_ENV
+
+      - name: Get the release notes from PR body
+        id: extract_notes
+        if: ${{ env.UPDATE_CHANGELOG }}
+        shell: bash
+        run: |
+          ./.github/scripts/check-release-notes.sh "$PR_BODY"
+
+      - name: Check the release notes info has been added to the PR description
+        id: check_notes
+        if: ${{ env.UPDATE_CHANGELOG }}
+        shell: bash
+        run: |
+          # this is here so we can check everything looks ok
+          echo "****************************************************"
+          echo "Release Note information found in Pull Request Body:"
+          echo "Update Type = $UPDATE_TYPE"
+          echo "Release Notes:"
+          echo "$RELEASE_NOTES"
+          echo "****************************************************"
+          echo "RELEASE_NOTES<<EOT_RN" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOT_RN" >> $GITHUB_ENV
+        # remove `continue-on-error: true` when ready to switch from changelog to PR for release notes
+        continue-on-error: true
+
+      - name: Check all Changelogs are valid
+        if: ${{ env.UPDATE_CHANGELOG }}
+        shell: bash
+        run: |
+          echo "Checking changelog on all modified stacks"
+          FOUND_INVALID_CHANGELOG="false"
+          ALL_MODIFIED_STACK_NAMES="${{ env.ALL_MODIFIED_STACK_NAMES }}"
+          ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES=""
+          echo "Found updated stacks: ${ALL_MODIFIED_STACK_NAMES}"
+          for STACK_NAME in $ALL_MODIFIED_STACK_NAMES; do
+            echo "--- Checking stack: ${STACK_NAME} ---"
+
+            echo "Set update type from changelog"
+            CHANGELOG_FILE=${STACK_NAME}/CHANGELOG.md
+            UNRELEASED_CHANGES=$(grep "^## \[Unreleased\]" $CHANGELOG_FILE) || true
+            if [ -z "$UNRELEASED_CHANGES" ] # If UNRELEASED_CHANGES is empty
+            then
+              echo "Error: $CHANGELOG_FILE doesn't contain unreleased changes"
+              FOUND_INVALID_CHANGELOG="true"
+            else
+              echo "$CHANGELOG_FILE contains unreleased changes: $UNRELEASED_CHANGES"
+            fi
+            UPDATE_TYPE_REGEX='^## \[Unreleased\] - (MAJOR|MINOR|PATCH)' # Capture MAJOR|MINOR|PATCH in group 1
+            if [[ $UNRELEASED_CHANGES =~ $UPDATE_TYPE_REGEX ]]
+            then
+              UPDATE_TYPE="${BASH_REMATCH[1]}"
+              echo "$CHANGELOG_FILE contains update type ${UPDATE_TYPE}"
+            else
+              echo "Error: $CHANGELOG_FILE doesn't contain update type"
+              FOUND_INVALID_CHANGELOG="true"
+            fi
+            ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES="${ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES} ${STACK_NAME}=$UPDATE_TYPE"
+            echo "UPDATE_TYPE=$UPDATE_TYPE" >> $GITHUB_ENV
+            echo "--- Finished checking stack: ${STACK_NAME} ---"
+          done
+          if [ "$FOUND_INVALID_CHANGELOG" = "true" ]; then
+            echo "Error: Invalid Changelog files were found. Review errors above and fix"
+            exit 1
+          fi
+          echo "All Changelogs are valid"
+          echo "ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES=$ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES" >> $GITHUB_ENV
+
+      - name: Process all modified stacks
+        id: process-stacks
+        if: ${{ env.UPDATE_CHANGELOG }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          # environment variables temporarily added to allow upload to dev bucket for testing new process
+          BUCKET_NAME: ${{ secrets.DEPLOY_TEST_BUCKET_NAME }}
+          PATH_PREFIX: "test-release"
+          SIGNING_PROFILE: ${{ secrets.SIGNING_PROFILE_DEVELOPMENT }}
+        run: |
+          ALL_RELEASES=$(
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/releases" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" 2>/dev/null |
+            jq -r '.[].name'
+          )
+          for STACK_NAME_AND_UPDATE_TYPE in ${{ env.ALL_MODIFIED_STACK_NAMES_AND_UPDATE_TYPES }}; do
+            IFS='=' read -r STACK_NAME UPDATE_TYPE <<< "$STACK_NAME_AND_UPDATE_TYPE"
+            echo "Stack Name: $STACK_NAME, Update Type: $UPDATE_TYPE"
+            echo "--- Processing stack: ${STACK_NAME} ---"
+
+            echo "Get current version"
+            CURRENT_VERSION=$(grep "devplatform-deploy ${STACK_NAME} template version" ${STACK_NAME}/template.yaml  | awk -F : '{ print $2 }' | sed -e 's/^[ \t]*//' )
+            echo "CURRENT_VERSION=$CURRENT_VERSION"
+
+            echo "Get current release version"
+            CURRENT_RELEASE_VERSION=$(
+              echo "$ALL_RELEASES" | \
+              grep "^$STACK_NAME/" | \
+              awk -F/ '{print $NF}' | \
+              sort -V | \
+              tail -n 1
+            )
+
+            if [[ "$CURRENT_VERSION" != "$CURRENT_RELEASE_VERSION" ]] then
+              echo "Error: Current release version ($CURRENT_RELEASE_VERSION) and Current changelog version ($CURRENT_VERSION) do not match"
+            fi
+
+            echo "Set new version using current version and update type"
+            NEW_VERSION=$(.github/scripts/version_increment.sh "$UPDATE_TYPE" "$CURRENT_VERSION")
+            if [[ $? -ne 0 ]]; then
+              echo "Error: version_increment.sh failed for ${STACK_NAME}. Exiting job."
+              exit 1
+            fi
+            echo "New version for ${STACK_NAME}: ${NEW_VERSION}"
+
+            echo "Set new release version using current release version and update type"
+            NEW_RELEASE_VERSION=$(.github/scripts/version_increment.sh "$UPDATE_TYPE" "$CURRENT_RELEASE_VERSION")
+            if [[ $? -ne 0 ]]; then
+              echo "Error: release version_increment.sh failed for ${STACK_NAME}. Exiting job."
+              exit 1
+            fi
+            echo "New release version for ${STACK_NAME}: ${NEW_RELEASE_VERSION}"
+
+            echo "Update template.yaml version for ${STACK_NAME} to ${NEW_VERSION}"
+            sed -i "s|devplatform-deploy ${STACK_NAME} template version.*|devplatform-deploy ${STACK_NAME} template version: ${NEW_VERSION}|g" ${STACK_NAME}/template.yaml
+
+            echo "Update Changelog with new version"
+            CHANGELOG_FILE=${STACK_NAME}/CHANGELOG.md
+            echo "Changes found in ${CHANGELOG_FILE}, updating version to ${NEW_VERSION}"
+            sed -i "s/^## \[Unreleased\].*/## \[${NEW_VERSION}\] \- $(date '+%Y-%m-%d')/" ${CHANGELOG_FILE}
+
+            echo "Commit and push the updated CHANGELOG.md"
+            tag="${STACK_NAME}/${NEW_VERSION}"
+            #git add ${CHANGELOG_FILE} ${STACK_NAME}/template.yaml
+            #git commit -m "Publishing: $tag, [publish-only]"
+            #git tag -a "$tag" -m "$tag"
+            #git push --atomic origin PSREDEV-2765 "$tag"
+
+            if [[ "$STACK_NAME" == 'sam-deploy-pipeline' ]]; then
+              echo "Transforming: $STACK_NAME"
+              if ! .github/scripts/publish-secondary-sources.sh; then
+                echo "Error: publish-secondary-sources.sh failed for ${STACK_NAME}."
+              fi
+            fi
+            if [[ "$STACK_NAME" == 'application-deploy-pipeline' ]]; then
+              echo "Transforming: $STACK_NAME"
+              if ! .github/scripts/publish-application-secondary-sources.sh; then
+                echo "Error: publish-application-secondary-sources.sh failed for ${STACK_NAME}."
+              fi
+            fi
+            if [[ "$STACK_NAME" == 'auth-deploy-pipeline' ]]; then
+              echo "Transforming: $STACK_NAME"
+              if ! .github/scripts/publish-auth-secondary-sources.sh; then
+                echo "Error: publish-auth-secondary-sources.sh failed for ${STACK_NAME}."
+              fi
+            fi
+
+            echo "Create new draft GitHub Release"
+            release="${STACK_NAME}/${NEW_RELEASE_VERSION}"
+            #gh release create "$release" \
+            #    --title "$release" \
+            #    --notes "${RELEASE_NOTES}" \
+            #    --target "PSREDEV-2765" \
+            #    --draft=true
+
+            echo "Uploading template to release"
+            #gh release upload "${release}" ${STACK_NAME}/template.yaml
+
+            echo "Publish the release"
+            #gh release edit "${release}" --draft=false --prerelease=false --latest=true
+
+            if [[ "$STACK_NAME" == 'budget-alerts' ]]; then
+              echo "publish_sam_deploy_pipeline_backup='true'"
+              echo "publish_sam_deploy_pipeline_backup='true'" >> "$GITHUB_OUTPUT"
+            fi
+
+            echo "--- Finished processing stack: ${STACK_NAME} ---"
+          done
+
+      - name: Debug create-releases output
+        run: |
+           echo "$GITHUB_OUTPUT"
+           echo "Raw output from process-stacks: '${{ steps.process-stacks.outputs.publish_sam_deploy_pipeline_backup }}'"
+           echo "Job output 'publish_sam_deploy_pipeline_backup': '${{ github.job_outputs.publish_sam_deploy_pipeline_backup }}'"
+           # Check length and type
+           echo "Is job output 'true'? ${{ github.job_outputs.publish_sam_deploy_pipeline_backup == 'true' }}"
+
+  publish-eu-west-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: create-releases
+    if: needs.create-releases.outputs.publish_sam_deploy_pipeline_backup == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: '0'
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+
+      - name: Cache Python packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip3.9-${{ hashFiles('.github/workflows/publish.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip3.9-
+
+      - name: Get modified stack
+        shell: bash
+        run: |
+          echo "PUBLISH BACKUP"
+          exit 1
+          dir=$(git diff-tree -m --no-commit-id --name-only HEAD | sort | uniq)
+          echo "Project directory $dir modified"
+          echo "STACK_NAME=$dir" >> $GITHUB_ENV
+
+      - name: Set up AWS credentials (eu-west-1)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.GH_ACTIONS_ROLE_ARN_EU_WEST_1 }}
+          aws-region: eu-west-1
+
+      - name: Publish secondary sources (eu-west-1)
+        shell: bash
+        run: '.github/scripts/publish-secondary-sources.sh'
+        env:
+          BUCKET_NAME: ${{ secrets.TEMPLATE_BUCKET_NAME_EU_WEST_1 }}
+
+      - name: Publish templates (eu-west-1)
+        shell: bash
+        run: '.github/scripts/publish.sh'
+        env:
+          BUCKET_NAME: ${{ secrets.TEMPLATE_BUCKET_NAME_EU_WEST_1 }}
+          SIGNING_PROFILE: ${{ secrets.SIGNING_PROFILE_EU_WEST_1 }}
+          STACK_NAME: ${{ env.STACK_NAME }}
